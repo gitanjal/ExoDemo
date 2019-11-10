@@ -2,8 +2,14 @@ package com.droidmonk.exodemo
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import android.view.MenuInflater
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import com.google.android.exoplayer2.ExoPlayerFactory
+import com.google.android.exoplayer2.PlaybackParameters
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.ExtractorMediaSource
@@ -12,6 +18,7 @@ import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.exo_playback_control_view.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -45,6 +52,41 @@ class MainActivity : AppCompatActivity() {
 
         player?.prepare(adsMediaSource)
         player?.setPlayWhenReady(true)
+
+
+        btn_speed.setOnClickListener {
+            //  Toast.makeText(it.context,"Click speed controll",Toast.LENGTH_LONG).show()
+
+            val popup = PopupMenu(this, it)
+            val inflater: MenuInflater = popup.menuInflater
+            inflater.inflate(R.menu.playback_speed, popup.menu)
+            popup.show()
+
+            popup.setOnMenuItemClickListener {
+
+                when (it.itemId) {
+                    R.id.one_x ->{
+                        player?.playbackParameters= PlaybackParameters(1f)
+                        true
+                    }
+                    R.id.two_x ->{
+                        player?.playbackParameters= PlaybackParameters(2f)
+                        true
+                    }
+                    R.id.three_x ->{
+                        player?.playbackParameters= PlaybackParameters(3f)
+                        true
+                    }
+                    else -> {
+                        Toast.makeText(this, "Invalid option ", Toast.LENGTH_LONG).show()
+                        true
+                    }
+                }
+
+
+            }
+
+        }
     }
 
 
