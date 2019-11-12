@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="Local Audio"
+        android:id="@+id/menu_local_audio"/>
+
+    <item android:title="Local Video"
+        android:id="@+id/menu_local_video"/>
+
+    <item android:title="Web Video"
+        android:id="@+id/menu_web_video"/>
+
+    <item android:title="Web Audio"
+        android:id="@+id/menu_web_audio"/>
+</menu>
