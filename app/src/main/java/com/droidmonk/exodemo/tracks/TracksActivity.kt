@@ -1,12 +1,9 @@
 package com.droidmonk.exodemo.tracks
 
-import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import com.droidmonk.exodemo.R
-import com.google.android.material.navigation.NavigationView
-import kotlinx.android.synthetic.main.activity_tracks.*;
+import kotlinx.android.synthetic.main.activity_tracks.*
 
 class TracksActivity : AppCompatActivity() {
 
@@ -15,7 +12,7 @@ class TracksActivity : AppCompatActivity() {
         setContentView(R.layout.activity_tracks)
 
         var type=TracksFragment.TYPE_AUDIO_LOCAL
-        supportFragmentManager.beginTransaction().replace(R.id.fr_holder,TracksFragment.newInstance(type))
+        supportFragmentManager.beginTransaction().replace(R.id.fr_holder,TracksFragment.newInstance(type)).commit()
 
         navigationView.setNavigationItemSelectedListener { item ->
             when(item.itemId)

@@ -2,19 +2,35 @@ package com.droidmonk.exodemo.tracks
 
 
 import android.Manifest
+import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
+import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.MimeTypeMap
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.droidmonk.exodemo.R
+import com.droidmonk.exodemo.VideoPlayerActivity
+import com.droidmonk.exodemo.audio.AudioPlayerActivity
+import com.droidmonk.exodemo.audio.AudioService
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.ui.PlayerNotificationManager
+import com.google.android.exoplayer2.util.MimeTypes.isAudio
+import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.fragment_tracks.*
 import java.util.*
+
 
 /**
  * A simple [Fragment] subclass.
@@ -37,13 +53,18 @@ class TracksFragment : Fragment() {
             }
     }
 
+
     var trackType:Int=TYPE_AUDIO_LOCAL   //default
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         trackType= arguments?.getInt(KEY_TYPE)?: TYPE_AUDIO_LOCAL
+
     }
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,14 +79,29 @@ class TracksFragment : Fragment() {
 
         checkPermission()
 
-
-
-
     }
 
     private fun setUpTrackList() {
 
         var adapter=TracksAdapter(getTrackList())
+        adapter.setOnClickListener(object : TracksAdapter.OnClickListener{
+            override fun onClick(track: Track) {
+
+
+                val uri= Uri.parse(track.path)
+
+                if(isAudio(getMimeType(track.path)))
+                {
+
+                    activity?.let {startActivity( AudioPlayerActivity.getCallingIntent(it,track))}
+
+                }
+                else
+                {
+                    startActivity(Intent(activity, VideoPlayerActivity::class.java).putExtra("track",track))
+                }
+            }
+        })
         list.layoutManager= LinearLayoutManager(activity)
         list.adapter=adapter
     }
@@ -92,25 +128,25 @@ class TracksFragment : Fragment() {
     private fun getLocalVideo():ArrayList<Track> {
         var trackList:ArrayList<Track> = ArrayList()
 
-        val musicResolver = activity?.contentResolver
-        val musicUri = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        val videoResolver = activity?.contentResolver
+        val videoUri = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI
 
-        val musicCursor = musicResolver?.query(musicUri, null, null, null, null)
+        val videoCursor = videoResolver?.query(videoUri, null, null, null, null)
 
-        if (musicCursor != null && musicCursor.moveToFirst()) {
+        if (videoCursor != null && videoCursor.moveToFirst()) {
             //get columns
-            val titleColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE)
-            val idColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID)
-            val artistColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ARTIST)
-            val dataColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.DATA)
+            val titleColumn = videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE)
+            val idColumn = videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID)
+            val artistColumn = videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ARTIST)
+            val dataColumn = videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.DATA)
             //add songs to list
             do {
-                val thisId = musicCursor.getLong(idColumn)
-                val thisTitle = musicCursor.getString(titleColumn)
-                val thisArtist = musicCursor.getString(artistColumn)
-                val thisPath=musicCursor.getString(dataColumn)
+                val thisId = videoCursor.getLong(idColumn)
+                val thisTitle = videoCursor.getString(titleColumn)
+                val thisArtist = videoCursor.getString(artistColumn)
+                val thisPath=videoCursor.getString(dataColumn)
                 trackList.add(Track(thisId, thisTitle, thisArtist,thisPath,null))
-            } while (musicCursor.moveToNext())
+            } while (videoCursor.moveToNext())
         }
 
         return trackList
@@ -194,5 +230,14 @@ class TracksFragment : Fragment() {
                 // Ignore all other requests.
             }
         }
+    }
+
+    fun getMimeType(url: String): String? {
+        var type: String? = null
+        val extension = MimeTypeMap.getFileExtensionFromUrl(url)
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+        }
+        return type
     }
 }

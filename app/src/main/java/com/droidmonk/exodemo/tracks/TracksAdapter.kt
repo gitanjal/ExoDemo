@@ -11,6 +11,18 @@ import kotlinx.android.synthetic.main.item_track.view.*
 
 
 class TracksAdapter(val tracks:ArrayList<Track>) : RecyclerView.Adapter<TracksAdapter.TracksViewHolder>() {
+
+    interface OnClickListener{
+        fun onClick(track:Track)
+    }
+
+    private lateinit var listener:OnClickListener
+
+    public fun setOnClickListener(listener:OnClickListener)
+    {
+        this.listener=listener
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TracksViewHolder {
         var view=LayoutInflater.from(parent.context).inflate(R.layout.item_track,parent,false)
         return TracksViewHolder(view)
@@ -24,7 +36,10 @@ class TracksAdapter(val tracks:ArrayList<Track>) : RecyclerView.Adapter<TracksAd
 
 
         holder.itemView.setOnClickListener {
-        holder.itemView.context.startActivity(Intent(holder.itemView.context,VideoPlayerActivity::class.java).putExtra("track",tracks[position]))
+        /*holder.itemView.context.startActivity(Intent(holder.itemView.context,VideoPlayerActivity::class.java).putExtra("track",tracks[position]))
+        */
+            listener.onClick(tracks[position])
+
         }
     }
 

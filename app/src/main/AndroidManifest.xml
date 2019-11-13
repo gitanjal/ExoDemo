@@ -3,7 +3,8 @@
     package="com.droidmonk.exodemo">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -13,6 +14,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity android:name=".audio.AudioPlayerActivity"></activity>
+
+        <service android:name=".audio.AudioService" />
+
         <activity android:name=".tracks.TracksActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
