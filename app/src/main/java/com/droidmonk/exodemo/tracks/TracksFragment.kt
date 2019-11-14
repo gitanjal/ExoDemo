@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.getIntent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -44,6 +45,7 @@ class TracksFragment : Fragment() {
 
         val KEY_TYPE="key"
 
+
         @JvmStatic
         fun newInstance(type:Int) =
             TracksFragment().apply {
@@ -55,7 +57,21 @@ class TracksFragment : Fragment() {
 
 
     var trackType:Int=TYPE_AUDIO_LOCAL   //default
+    private lateinit var mService: AudioService
+    private var mBound: Boolean = false
 
+    private val connection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            val binder = service as AudioService.AudioServiceBinder
+            mService = binder.getService()
+            mBound = true
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            mBound = false
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,8 +79,6 @@ class TracksFragment : Fragment() {
         trackType= arguments?.getInt(KEY_TYPE)?: TYPE_AUDIO_LOCAL
 
     }
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -85,6 +99,23 @@ class TracksFragment : Fragment() {
 
         var adapter=TracksAdapter(getTrackList())
         adapter.setOnClickListener(object : TracksAdapter.OnClickListener{
+            override fun onClickAddToPlaylist(track: Track) {
+
+                if(!mBound) {
+                    val intent = Intent(activity, AudioService::class.java)
+                    intent.putExtra(AudioService.KEY_TRACK, track)
+                    intent.putExtra(AudioService.KEY_ADD_TO_PLAYLIST,true)
+                    Util.startForegroundService(activity, intent)
+
+                    activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+                }
+                else
+                {
+                    mService.addAudioToPlaylist(track)
+                }
+
+            }
+
             override fun onClick(track: Track) {
 
 
@@ -239,5 +270,12 @@ class TracksFragment : Fragment() {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
         }
         return type
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        activity?.unbindService(connection)
+        mBound = false
     }
 }

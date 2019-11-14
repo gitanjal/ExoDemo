@@ -14,6 +14,7 @@ class TracksAdapter(val tracks:ArrayList<Track>) : RecyclerView.Adapter<TracksAd
 
     interface OnClickListener{
         fun onClick(track:Track)
+        fun onClickAddToPlaylist(track:Track)
     }
 
     private lateinit var listener:OnClickListener
@@ -36,11 +37,13 @@ class TracksAdapter(val tracks:ArrayList<Track>) : RecyclerView.Adapter<TracksAd
 
 
         holder.itemView.setOnClickListener {
-        /*holder.itemView.context.startActivity(Intent(holder.itemView.context,VideoPlayerActivity::class.java).putExtra("track",tracks[position]))
-        */
             listener.onClick(tracks[position])
-
         }
+
+        holder.itemView.more.setOnClickListener {
+            listener.onClickAddToPlaylist(tracks[position])
+        }
+
     }
 
     class TracksViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)

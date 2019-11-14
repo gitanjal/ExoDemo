@@ -13,12 +13,19 @@ import com.droidmonk.exodemo.tracks.Track
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 
+
 class AudioService : Service() {
+
+    companion object{
+         val KEY_TRACK="track"
+         val KEY_ADD_TO_PLAYLIST="add_to_playlist"
+    }
 
     val PLAYBACK_CHANNEL_ID = "playback_channel"
     val PLAYBACK_NOTIFICATION_ID = 1
@@ -26,6 +33,7 @@ class AudioService : Service() {
     private val binder = AudioServiceBinder()
     private var playerNotificationManager: PlayerNotificationManager? = null
     private var player: SimpleExoPlayer? = null
+    private lateinit var concatenatedSource: ConcatenatingMediaSource
 
     private lateinit var currentTrack:Track
 
@@ -82,11 +90,19 @@ class AudioService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
 
-        val track= intent?.getParcelableExtra<Track>("track")!!
+        val track= intent?.getParcelableExtra<Track>(KEY_TRACK)!!
+        val addToPlayList=intent.getBooleanExtra(KEY_ADD_TO_PLAYLIST,false)
+        if(addToPlayList) {
 
-        playAudio(track)
+            if(isPlaying())
+                addAudioToPlaylist(track)
+            else
+                playAudio(track)
+        }
+        else
+            playAudio(track)
 
-        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     inner class AudioServiceBinder : Binder() {
@@ -103,8 +119,31 @@ class AudioService : Service() {
         val mediaSource: ExtractorMediaSource = ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(
             Uri.parse(track?.path))
 
-        player?.prepare(mediaSource)
+
+        concatenatedSource = ConcatenatingMediaSource(mediaSource)
+
+        player?.prepare(concatenatedSource)
         player?.setPlayWhenReady(true)
 
+    }
+
+
+    fun addAudioToPlaylist(track: Track)
+    {
+
+
+        val dataSourceFactory: DefaultDataSourceFactory = DefaultDataSourceFactory(this,"Media Player")
+        val mediaSource: ExtractorMediaSource = ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(
+            Uri.parse(track?.path))
+
+
+
+        concatenatedSource.addMediaSource(mediaSource)
+
+
+    }
+
+    fun isPlaying(): Boolean {
+        return player?.getPlaybackState() === Player.STATE_READY && player?.getPlayWhenReady()?:false
     }
 }
