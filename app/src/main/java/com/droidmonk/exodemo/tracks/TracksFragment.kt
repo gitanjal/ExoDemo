@@ -10,6 +10,8 @@ import android.content.Intent.getIntent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
@@ -150,8 +152,8 @@ class TracksFragment : Fragment() {
 
     private fun getWebVideo():ArrayList<Track> {
 
-        var trackMP4=Track(1,"Simple MP4","Artist 1", resources.getString(R.string.media_url_mp4),null)
-        var trackDASH=Track(1,"Simple DASH","Artist 1", resources.getString(R.string.media_url_dash),"mpd")
+        var trackMP4=Track(1,"Simple MP4","Artist 1", resources.getString(R.string.media_url_mp4),null,null)
+        var trackDASH=Track(1,"Simple DASH","Artist 1", resources.getString(R.string.media_url_dash),"mpd",null)
 
         return arrayListOf(trackMP4,trackDASH)
     }
@@ -176,7 +178,7 @@ class TracksFragment : Fragment() {
                 val thisTitle = videoCursor.getString(titleColumn)
                 val thisArtist = videoCursor.getString(artistColumn)
                 val thisPath=videoCursor.getString(dataColumn)
-                trackList.add(Track(thisId, thisTitle, thisArtist,thisPath,null))
+                trackList.add(Track(thisId, thisTitle, thisArtist,thisPath,null,null))
             } while (videoCursor.moveToNext())
         }
 
@@ -197,13 +199,22 @@ class TracksFragment : Fragment() {
             val idColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID)
             val artistColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ARTIST)
             val dataColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.DATA)
+            val albumColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ALBUM)
             //add songs to list
             do {
                 val thisId = musicCursor.getLong(idColumn)
                 val thisTitle = musicCursor.getString(titleColumn)
                 val thisArtist = musicCursor.getString(artistColumn)
                 val thisPath=musicCursor.getString(dataColumn)
-                trackList.add(Track(thisId, thisTitle, thisArtist,thisPath,null))
+                val thisAlbum=musicCursor.getString(albumColumn)
+
+                var mediaDataRetriever= MediaMetadataRetriever()
+                mediaDataRetriever.setDataSource(thisPath)
+
+                val albumArt:ByteArray=mediaDataRetriever.embeddedPicture
+                val songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
+
+                trackList.add(Track(thisId, thisTitle, thisArtist,thisPath,null,songImage))
             } while (musicCursor.moveToNext())
         }
 

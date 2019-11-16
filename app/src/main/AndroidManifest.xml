@@ -16,7 +16,11 @@
         android:usesCleartextTraffic="true">
         <activity android:name=".audio.AudioPlayerActivity"></activity>
 
-        <service android:name=".audio.AudioService" />
+        <service android:name=".audio.AudioService" >
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
 
         <activity android:name=".tracks.TracksActivity">
             <intent-filter>
