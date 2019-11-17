@@ -211,9 +211,12 @@ class TracksFragment : Fragment() {
                 var mediaDataRetriever= MediaMetadataRetriever()
                 mediaDataRetriever.setDataSource(thisPath)
 
-                val albumArt:ByteArray=mediaDataRetriever.embeddedPicture
-                val songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
+                var songImage:Bitmap?=null
+                mediaDataRetriever.embeddedPicture?.let {
 
+                    val albumArt:ByteArray=mediaDataRetriever.embeddedPicture
+                    songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
+                }
                 trackList.add(Track(thisId, thisTitle, thisArtist,thisPath,null,songImage))
             } while (musicCursor.moveToNext())
         }
