@@ -38,5 +38,7 @@ dependencies {
 
     implementation 'com.google.android.exoplayer:exoplayer-core:2.10.5'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.10.5'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:2.9.6'
     implementation 'com.google.android.exoplayer:extension-ima:2.9.6'
+    implementation 'com.google.android.exoplayer:extension-mediasession:2.10.0'
 }

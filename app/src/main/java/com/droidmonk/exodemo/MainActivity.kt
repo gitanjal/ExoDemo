@@ -9,7 +9,6 @@ import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -33,7 +32,7 @@ class MainActivity : AppCompatActivity() {
             "ExoDemo")
 
         val mediaSource:MediaSource=ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(Uri.parse(resources.getString(R.string.media_url_mp4)))
+            .createMediaSource(Uri.parse(resources.getString(R.string.video_url)))
 
         player?.prepare(mediaSource)
         player?.setPlayWhenReady(true)
