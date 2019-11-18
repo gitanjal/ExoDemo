@@ -2,7 +2,6 @@ package com.droidmonk.exodemo.tracks
 
 
 import android.Manifest
-import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -27,8 +26,6 @@ import com.droidmonk.exodemo.R
 import com.droidmonk.exodemo.VideoPlayerActivity
 import com.droidmonk.exodemo.audio.AudioPlayerActivity
 import com.droidmonk.exodemo.audio.AudioService
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.util.MimeTypes.isAudio
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.fragment_tracks.*
@@ -168,17 +165,20 @@ class TracksFragment : Fragment() {
 
         if (videoCursor != null && videoCursor.moveToFirst()) {
             //get columns
-            val titleColumn = videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE)
+            val titleColumn =
+                videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE)
             val idColumn = videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID)
-            val artistColumn = videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ARTIST)
-            val dataColumn = videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.DATA)
+            val artistColumn =
+                videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ARTIST)
+            val dataColumn =
+                videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.DATA)
             //add songs to list
             do {
                 val thisId = videoCursor.getLong(idColumn)
                 val thisTitle = videoCursor.getString(titleColumn)
                 val thisArtist = videoCursor.getString(artistColumn)
-                val thisPath=videoCursor.getString(dataColumn)
-                trackList.add(Track(thisId, thisTitle, thisArtist,thisPath,null,null))
+                val thisPath = videoCursor.getString(dataColumn)
+                trackList.add(Track(thisId, thisTitle, thisArtist, thisPath, null, null))
             } while (videoCursor.moveToNext())
         }
 
@@ -206,7 +206,6 @@ class TracksFragment : Fragment() {
                 val thisTitle = musicCursor.getString(titleColumn)
                 val thisArtist = musicCursor.getString(artistColumn)
                 val thisPath=musicCursor.getString(dataColumn)
-                val thisAlbum=musicCursor.getString(albumColumn)
 
                 var mediaDataRetriever= MediaMetadataRetriever()
                 mediaDataRetriever.setDataSource(thisPath)

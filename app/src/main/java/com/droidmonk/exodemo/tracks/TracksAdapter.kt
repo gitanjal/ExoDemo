@@ -33,7 +33,11 @@ class TracksAdapter(val tracks:ArrayList<Track>) : RecyclerView.Adapter<TracksAd
 
     override fun onBindViewHolder(holder: TracksViewHolder, position: Int) {
         holder.itemView.track_title.text=tracks[position].trackTitle
-
+        tracks[position].albumArt?.let {
+            holder.itemView.img_album.setImageBitmap(tracks[position].albumArt)
+        }?:run{
+            holder.itemView.img_album.setImageDrawable(holder.itemView.context.resources.getDrawable(R.drawable.ic_music_note_black_24dp))
+        }
 
 
         holder.itemView.setOnClickListener {

@@ -4,6 +4,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.media.session.PlaybackState.STATE_PAUSED
+import android.media.session.PlaybackState.STATE_PLAYING
 import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -22,11 +24,14 @@ import java.io.IOException
 
 class AudioPlayerActivity : AppCompatActivity() {
 
+    private val STATE_PAUSED = 0
+    private val STATE_PLAYING = 1
 
     private lateinit var mMediaBrowserCompat: MediaBrowserCompat
     private lateinit var mediaController: MediaControllerCompat
     private lateinit var mService: AudioService
     private var mBound: Boolean = false
+    private var mCurrentState: Int = 0
 
     companion object {
         private val KEY_TRACK="track"
@@ -51,25 +56,12 @@ class AudioPlayerActivity : AppCompatActivity() {
         }
     }
 
-    private val mMediaControllerCompatCallback = object : MediaControllerCompat.Callback() {
-
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-            super.onPlaybackStateChanged(state)
-
-        }
-    }
 
     private val mediaBrowserConnectionCallback = object : MediaBrowserCompat.ConnectionCallback(){
         override fun onConnected() {
             super.onConnected()
 
             try {
-/*                mediaController = MediaControllerCompat(this@AudioPlayerActivity, mMediaBrowserCompat.sessionToken).apply {
-                    registerCallback(mMediaControllerCompatCallback)
-                }
-
-                MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)*/
-
 
                 mMediaBrowserCompat.sessionToken.also{token->
                      mediaController = MediaControllerCompat(
@@ -79,6 +71,8 @@ class AudioPlayerActivity : AppCompatActivity() {
                 }
 
                 MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
+
+
 
                 buildTransportControls()
 
@@ -107,18 +101,18 @@ class AudioPlayerActivity : AppCompatActivity() {
 
 
 
+
+/*
+
         btn_pause.setOnClickListener({
 
             mediaController.transportControls.pause()
         })
+*/
 
-        btn_play.setOnClickListener({
-
-            mediaController.transportControls.play()
-        })
 
         btn_repeat.setOnClickListener({
-            mediaController.transportControls.setRepeatMode(Player.REPEAT_MODE_ALL)
+            mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
         })
 
     }
@@ -152,8 +146,10 @@ class AudioPlayerActivity : AppCompatActivity() {
 
                 val pbState = mediaController.playbackState.state
                 if (pbState == PlaybackStateCompat.STATE_PLAYING) {
+                    btn_play.background=resources.getDrawable(R.drawable.ic_pause)
                     mediaController.transportControls.pause()
                 } else {
+                    btn_play.background=resources.getDrawable(R.drawable.ic_play)
                     mediaController.transportControls.play()
                 }
             }

@@ -6,23 +6,99 @@
     android:layout_height="match_parent"
     tools:context=".audio.AudioPlayerActivity">
 
-    <Button
-        android:text="Pause"
-        android:id="@+id/btn_pause"
+    <include
+        android:id="@+id/app_bar"
+        layout="@layout/app_bar" />
+
+    <ImageView
+        android:background="#cccccc"
+        android:src="@drawable/ic_music_note_black_24dp"
+        android:id="@+id/img_album_art"
+        android:layout_centerInParent="true"
+        android:layout_width="250dp"
+        android:layout_height="250dp"/>
+
+    <TextView
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:text="My Recording 2"
+        android:id="@+id/tv_title"
+        android:layout_margin="16dp"
+        android:layout_below="@id/img_album_art"
+        android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <Button
-        android:layout_below="@id/btn_pause"
-        android:text="Play"
-        android:id="@+id/btn_play"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <RelativeLayout
+        android:id="@+id/actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
 
-    <Button
-        android:layout_below="@id/btn_play"
-        android:text="Loop"
-        android:id="@+id/btn_repeat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_margin="10dp"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/btn_prev"
+                android:id="@+id/btn_repeat"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/ic_repeat"
+                />
+
+            <ImageView
+                android:layout_margin="10dp"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/btn_play"
+                android:id="@+id/btn_prev"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/ic_skip_previous"
+                />
+
+            <ImageView
+                android:layout_centerHorizontal="true"
+                android:id="@+id/btn_play"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/ic_play"
+                />
+            <ImageView
+                android:layout_margin="10dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/btn_play"
+                android:id="@+id/btn_next"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/ic_skip_next"
+                />
+
+            <ImageView
+                android:layout_margin="10dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/btn_next"
+                android:id="@+id/btn_suffle"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/ic_shuffle"
+                />
+        </RelativeLayout>
+       <!--
+        <Button
+            android:id="@+id/btn_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pause" />
+
+
+        <Button
+            android:id="@+id/btn_repeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_play"
+            android:text="Loop" />-->
+    </RelativeLayout>
 </RelativeLayout>
