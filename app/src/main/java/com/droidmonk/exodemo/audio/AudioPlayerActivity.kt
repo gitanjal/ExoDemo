@@ -13,12 +13,16 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import com.droidmonk.exodemo.R
 import com.droidmonk.exodemo.tracks.Track
+import com.droidmonk.exodemo.tracks.TracksActivity
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.activity_audio_player.*
+import kotlinx.android.synthetic.main.activity_tracks.*
+import kotlinx.android.synthetic.main.app_bar.*
 import java.io.IOException
 
 
@@ -92,6 +96,13 @@ class AudioPlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_audio_player)
 
+        val tbar:androidx.appcompat.widget.Toolbar=findViewById(R.id.app_bar)
+
+        setSupportActionBar(tbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
+
+
         mMediaBrowserCompat = MediaBrowserCompat(
             this, ComponentName(this, AudioService::class.java),
             mediaBrowserConnectionCallback, intent.extras
@@ -100,7 +111,7 @@ class AudioPlayerActivity : AppCompatActivity() {
         mMediaBrowserCompat.connect()
 
 
-
+        val track=intent.getParcelableExtra<Track>(KEY_TRACK)
 
 /*
 
@@ -109,13 +120,15 @@ class AudioPlayerActivity : AppCompatActivity() {
             mediaController.transportControls.pause()
         })
 */
-
+        tbar.title=track.trackTitle
+        tv_track_title.setText(track.trackTitle)
 
         btn_repeat.setOnClickListener({
             mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
         })
 
     }
+
 
     override fun onStart() {
         super.onStart()

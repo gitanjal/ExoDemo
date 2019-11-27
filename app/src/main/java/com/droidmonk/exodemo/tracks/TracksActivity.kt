@@ -2,11 +2,14 @@ package com.droidmonk.exodemo.tracks
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toolbar
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import com.droidmonk.exodemo.R
 import kotlinx.android.synthetic.main.activity_tracks.*
 import kotlinx.android.synthetic.main.app_bar.*
+import kotlinx.android.synthetic.main.app_bar.view.*
+
 
 class TracksActivity : AppCompatActivity() {
 
@@ -16,31 +19,19 @@ class TracksActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tracks)
 
-        actionBarToggle =object: ActionBarDrawerToggle(this, drawer_layout, toolbar,
-            R.string.drawer_open, R.string.drawer_close){
+        val tbar:androidx.appcompat.widget.Toolbar=findViewById(R.id.app_bar)
 
-            override fun onDrawerOpened(drawerView: View) {
-                super.onDrawerOpened(drawerView)
-
-
-            }
-
-            override fun onDrawerClosed(drawerView: View) {
-                super.onDrawerClosed(drawerView)
-            }
-        }
-
-        setSupportActionBar(toolbar)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowHomeEnabled(true)
-            setHomeButtonEnabled(true)
-            actionBarToggle.syncState()
-        }
-
-
+        setSupportActionBar(tbar)
+        actionBarToggle = ActionBarDrawerToggle(this, drawer_layout,tbar, R.string.drawer_open, R.string.drawer_close)
         drawer_layout.addDrawerListener(actionBarToggle)
-        drawer_layout.post(Runnable { actionBarToggle.syncState() })
+
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp)
+
+
+        actionBarToggle.syncState()
 
 
         var type=TracksFragment.TYPE_AUDIO_LOCAL
@@ -58,7 +49,7 @@ class TracksActivity : AppCompatActivity() {
                     true
                 }
                 R.id.menu_web_audio->{
-                    type=TracksFragment.TYPE_AUDIO_LOCAL
+                    type=TracksFragment.TYPE_AUDIO_WEB
                     true
                 }
                 R.id.menu_web_video->{
@@ -76,4 +67,9 @@ class TracksActivity : AppCompatActivity() {
         }
 
     }
+    public override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        actionBarToggle.syncState()
+    }
+
 }

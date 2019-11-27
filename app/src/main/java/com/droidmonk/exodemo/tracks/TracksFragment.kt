@@ -41,6 +41,7 @@ class TracksFragment : Fragment() {
         val TYPE_AUDIO_LOCAL=1
         val TYPE_VIDEO_LOCAL=2
         val TYPE_VIDEO_WEB=3
+        val TYPE_AUDIO_WEB=4
 
         val KEY_TYPE="key"
 
@@ -142,6 +143,7 @@ class TracksFragment : Fragment() {
                     TYPE_AUDIO_LOCAL->getLocalAudio()
                     TYPE_VIDEO_LOCAL->getLocalVideo()
                     TYPE_VIDEO_WEB->getWebVideo()
+                    TYPE_AUDIO_WEB->getWebAudio()
                     else->ArrayList<Track>()
                 }
 
@@ -153,6 +155,16 @@ class TracksFragment : Fragment() {
         var trackDASH=Track(1,"Simple DASH","Artist 1", resources.getString(R.string.media_url_dash),"mpd",null)
 
         return arrayListOf(trackMP4,trackDASH)
+    }
+
+    private fun getWebAudio():ArrayList<Track> {
+
+        var trackMP4=Track(1,"Guitar solo","Unknown Artist", resources.getString(R.string.media_url_mp4),null,null)
+        var trackDASH=Track(1,"Guitar fingerstyle","Unknown Artist", resources.getString(R.string.media_url_dash),null,null)
+        var trackMP41=Track(1,"C progression","Unknown Artist", resources.getString(R.string.media_url_mp4),null,null)
+        var trackDASH2=Track(1,"Do re mi","Unknown Artist", resources.getString(R.string.media_url_dash),null,null)
+
+        return arrayListOf(trackMP4,trackDASH,trackMP41,trackDASH2)
     }
 
     private fun getLocalVideo():ArrayList<Track> {
@@ -288,7 +300,9 @@ class TracksFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
 
-        activity?.unbindService(connection)
-        mBound = false
+        if(mBound) {
+            activity?.unbindService(connection)
+            mBound = false
+        }
     }
 }

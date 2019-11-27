@@ -39,6 +39,10 @@ class TracksAdapter(val tracks:ArrayList<Track>) : RecyclerView.Adapter<TracksAd
             holder.itemView.img_album.setImageDrawable(holder.itemView.context.resources.getDrawable(R.drawable.ic_music_note_black_24dp))
         }
 
+        if(tracks[position].path.contains("http://") || tracks[position].path.contains("https://"))
+            holder.itemView.download.visibility=View.VISIBLE
+        else
+            holder.itemView.download.visibility=View.GONE
 
         holder.itemView.setOnClickListener {
             listener.onClick(tracks[position])

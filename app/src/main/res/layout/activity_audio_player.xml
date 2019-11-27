@@ -22,7 +22,7 @@
         android:textSize="25sp"
         android:textStyle="bold"
         android:text="My Recording 2"
-        android:id="@+id/tv_title"
+        android:id="@+id/tv_track_title"
         android:layout_margin="16dp"
         android:layout_below="@id/img_album_art"
         android:layout_centerHorizontal="true"
