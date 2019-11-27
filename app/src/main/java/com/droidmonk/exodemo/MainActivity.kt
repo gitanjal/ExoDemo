@@ -3,11 +3,13 @@ package com.droidmonk.exodemo
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
@@ -37,10 +39,18 @@ class MainActivity : AppCompatActivity() {
             this,
             "ExoDemo")
 
-        val mediaSource:MediaSource=ExtractorMediaSource.Factory(dataSourceFactory)
+        val mediaSource:MediaSource=ProgressiveMediaSource.Factory(dataSourceFactory)
             .createMediaSource(Uri.parse(resources.getString(R.string.media_url_mp4)))
 
-        val adsMediaSource = AdsMediaSource(mediaSource, dataSourceFactory, adsLoader, player_view)
+        val adsMediaSource = AdsMediaSource(mediaSource, object : AdsMediaSource.MediaSourceFactory{
+            override fun getSupportedTypes(): IntArray {
+                return intArrayOf(C.TYPE_DASH, C.TYPE_HLS, C.TYPE_OTHER)
+            }
+
+            override fun createMediaSource(uri: Uri?): MediaSource {
+                return ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
+            }
+        }, adsLoader, player_view)
 
 
         player?.prepare(adsMediaSource)

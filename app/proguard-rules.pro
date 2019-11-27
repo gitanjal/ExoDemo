@@ -19,3 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+-dontnote com.google.android.exoplayer2.ext.ima.ImaAdsLoader
+-keepclassmembers class com.google.android.exoplayer2.ext.ima.ImaAdsLoader {
+  <init>(android.content.Context, android.net.Uri);
+}
