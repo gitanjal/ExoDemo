@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.source.dash.DashMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
@@ -103,7 +104,7 @@ class VideoPlayerActivity : AppCompatActivity() {
             C.TYPE_DASH
                 -> return DashMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
             C.TYPE_OTHER
-                -> return ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
+                -> return ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
             else ->
                 throw IllegalStateException("Unsupported type: $type")
         }

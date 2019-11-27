@@ -35,9 +35,9 @@
 
     <ImageButton android:id="@id/exo_rew"
       style="@style/ExoMediaButton.Rewind"/>
-
+<!--
     <ImageButton android:id="@id/exo_shuffle"
-      style="@style/ExoMediaButton.Shuffle"/>
+      style="@style/ExoMediaButton.Shuffle"/>-->
 
 
     <ImageButton android:id="@id/exo_repeat_toggle"
