@@ -42,15 +42,7 @@ class MainActivity : AppCompatActivity() {
         val mediaSource:MediaSource=ProgressiveMediaSource.Factory(dataSourceFactory)
             .createMediaSource(Uri.parse(resources.getString(R.string.media_url_mp4)))
 
-        val adsMediaSource = AdsMediaSource(mediaSource, object : AdsMediaSource.MediaSourceFactory{
-            override fun getSupportedTypes(): IntArray {
-                return intArrayOf(C.TYPE_DASH, C.TYPE_HLS, C.TYPE_OTHER)
-            }
-
-            override fun createMediaSource(uri: Uri?): MediaSource {
-                return ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
-            }
-        }, adsLoader, player_view)
+        val adsMediaSource = AdsMediaSource(mediaSource, dataSourceFactory, adsLoader, player_view)
 
 
         player?.prepare(adsMediaSource)
