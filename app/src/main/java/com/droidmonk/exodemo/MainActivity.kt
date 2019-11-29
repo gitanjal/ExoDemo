@@ -34,6 +34,8 @@ class MainActivity : AppCompatActivity() {
         val mediaSource:MediaSource=ProgressiveMediaSource.Factory(dataSourceFactory)
             .createMediaSource(Uri.parse(resources.getString(R.string.video_url)))
 
+
+
         player?.prepare(mediaSource)
         player?.setPlayWhenReady(true)
     }
