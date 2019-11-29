@@ -8,6 +8,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -37,10 +38,11 @@ class MainActivity : AppCompatActivity() {
 
         val mediaSource:MediaSource=ProgressiveMediaSource.Factory(dataSourceFactory)
             .createMediaSource(Uri.parse(resources.getString(R.string.video_url)))
+        val adsMediaSource = AdsMediaSource(mediaSource, dataSourceFactory, adsLoader, player_view)
 
 
 
-        player?.prepare(mediaSource)
+        player?.prepare(adsMediaSource)
         player?.setPlayWhenReady(true)
     }
 }
