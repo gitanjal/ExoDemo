@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity() {
 
         player=ExoPlayerFactory.newSimpleInstance(this,DefaultTrackSelector())
         player_view.player=player
+        adsLoader.setPlayer(player)
 
 
         val dataSourceFactory = DefaultDataSourceFactory(
