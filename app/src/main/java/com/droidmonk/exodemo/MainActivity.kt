@@ -41,8 +41,6 @@ class MainActivity : AppCompatActivity() {
             .createMediaSource(Uri.parse(resources.getString(R.string.video_url)))
         val adsMediaSource = AdsMediaSource(mediaSource, dataSourceFactory, adsLoader, player_view)
 
-
-
         player?.prepare(adsMediaSource)
         player?.setPlayWhenReady(true)
     }
