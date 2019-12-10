@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             "ExoDemo")
 
         val mediaSource:MediaSource=DashMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(Uri.parse(resources.getString(R.string.media_url_mp4)))
+            .createMediaSource(Uri.parse(resources.getString(R.string.media_url_dash)))
 
         val adsMediaSource = AdsMediaSource(mediaSource, dataSourceFactory, adsLoader, player_view)
 
@@ -53,11 +53,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
 
-        adsLoader?.setPlayer(null)
+
         player_view.setPlayer(null)
         player?.release()
         player = null
 
         super.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        adsLoader?.setPlayer(null)
     }
 }
