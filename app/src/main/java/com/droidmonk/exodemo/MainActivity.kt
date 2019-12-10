@@ -11,6 +11,7 @@ import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.ads.AdsMediaSource
+import com.google.android.exoplayer2.source.dash.DashMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -39,7 +40,7 @@ class MainActivity : AppCompatActivity() {
             this,
             "ExoDemo")
 
-        val mediaSource:MediaSource=ProgressiveMediaSource.Factory(dataSourceFactory)
+        val mediaSource:MediaSource=DashMediaSource.Factory(dataSourceFactory)
             .createMediaSource(Uri.parse(resources.getString(R.string.media_url_mp4)))
 
         val adsMediaSource = AdsMediaSource(mediaSource, dataSourceFactory, adsLoader, player_view)
