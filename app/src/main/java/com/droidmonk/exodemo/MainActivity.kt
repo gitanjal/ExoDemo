@@ -44,4 +44,14 @@ class MainActivity : AppCompatActivity() {
         player?.prepare(adsMediaSource)
         player?.setPlayWhenReady(true)
     }
+
+    override fun onStop() {
+
+        adsLoader?.setPlayer(null)
+        player_view.setPlayer(null)
+        player?.release()
+        player = null
+
+        super.onStop()
+    }
 }
