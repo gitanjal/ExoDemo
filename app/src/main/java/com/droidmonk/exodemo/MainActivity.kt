@@ -14,8 +14,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    val TAG:String="MainActivity"
-
     private var currentPosition: Long = 0
     private var player: SimpleExoPlayer? = null
 
@@ -45,25 +43,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        super.onStop()
-
-        Log.d(TAG,"Onstop")
-
         currentPosition = player!!.contentPosition
         player_view.setPlayer(null)
         player!!.release()
         player = null
 
         super.onStop()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG,"Onpause")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG,"Onresume")
     }
 }
