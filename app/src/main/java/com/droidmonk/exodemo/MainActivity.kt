@@ -57,15 +57,12 @@ class MainActivity : AppCompatActivity() {
 
 
         btn_speed.setOnClickListener {
-            //  Toast.makeText(it.context,"Click speed controll",Toast.LENGTH_LONG).show()
-
             val popup = PopupMenu(this, it)
             val inflater: MenuInflater = popup.menuInflater
             inflater.inflate(R.menu.playback_speed, popup.menu)
             popup.show()
 
             popup.setOnMenuItemClickListener {
-
                 when (it.itemId) {
                     R.id.one_x -> {
                         player?.playbackParameters = PlaybackParameters(1f)
@@ -85,7 +82,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-
         }
     }
 
