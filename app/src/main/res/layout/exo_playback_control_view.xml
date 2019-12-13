@@ -57,6 +57,16 @@
         <ImageButton android:id="@id/exo_vr"
             style="@style/ExoMediaButton.VR"/>
 
+        <TextView
+            android:layout_gravity="center_vertical"
+            android:gravity="center"
+            android:id="@+id/btn_speed"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:text="1x"
+            android:layout_width="48dp"
+            android:layout_height="48dp"/>
+
     </LinearLayout>
 
     <LinearLayout
