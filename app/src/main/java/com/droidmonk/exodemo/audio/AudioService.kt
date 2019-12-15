@@ -2,20 +2,16 @@ package com.droidmonk.exodemo.audio
 
 import android.app.Notification
 import android.app.PendingIntent
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.media.AudioManager
 import android.net.Uri
-import android.os.Binder
 import android.os.Bundle
-import android.os.IBinder
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.text.TextUtils
 import androidx.media.MediaBrowserServiceCompat
 import com.droidmonk.exodemo.R
 import com.droidmonk.exodemo.tracks.Track
@@ -46,7 +42,7 @@ class AudioService : MediaBrowserServiceCompat() {
     val PLAYBACK_CHANNEL_ID = "playback_channel"
     val PLAYBACK_NOTIFICATION_ID = 1
 
-    private val binder = AudioServiceBinder()
+//    private val binder = AudioServiceBinder()
     private var playerNotificationManager: PlayerNotificationManager? = null
     private var player: SimpleExoPlayer? = null
     private lateinit var concatenatedSource: ConcatenatingMediaSource
@@ -61,7 +57,10 @@ class AudioService : MediaBrowserServiceCompat() {
     override fun onCreate() {
         super.onCreate()
 
+
+
         player = ExoPlayerFactory.newSimpleInstance(this, DefaultTrackSelector())
+
 
         playerNotificationManager= PlayerNotificationManager.createWithNotificationChannel(
             applicationContext,
@@ -88,7 +87,6 @@ class AudioService : MediaBrowserServiceCompat() {
                     return null
                 }
             }
-
         )
 
         playerNotificationManager?.setNotificationListener(object : PlayerNotificationManager.NotificationListener{
@@ -216,10 +214,10 @@ class AudioService : MediaBrowserServiceCompat() {
         return START_STICKY
     }
 
-    inner class AudioServiceBinder : Binder() {
+   /* inner class AudioServiceBinder : Binder() {
         // Return this instance of LocalService so clients can call public methods
         fun getService(): AudioService = this@AudioService
-    }
+    }*/
 
     fun playAudio(track: Track)
     {

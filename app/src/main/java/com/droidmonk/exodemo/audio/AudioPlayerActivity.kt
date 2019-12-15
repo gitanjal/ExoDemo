@@ -47,7 +47,7 @@ class AudioPlayerActivity : AppCompatActivity() {
         }
     }
 
-    private val connection = object : ServiceConnection {
+    /*private val connection = object : ServiceConnection {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as AudioService.AudioServiceBinder
@@ -58,7 +58,7 @@ class AudioPlayerActivity : AppCompatActivity() {
         override fun onServiceDisconnected(arg0: ComponentName) {
             mBound = false
         }
-    }
+    }*/
 
 
     private val mediaBrowserConnectionCallback = object : MediaBrowserCompat.ConnectionCallback(){
@@ -108,7 +108,7 @@ class AudioPlayerActivity : AppCompatActivity() {
             mediaBrowserConnectionCallback, intent.extras
         )
 
-        mMediaBrowserCompat.connect()
+       // mMediaBrowserCompat.connect()
 
 
         val track=intent.getParcelableExtra<Track>(KEY_TRACK)
@@ -123,9 +123,9 @@ class AudioPlayerActivity : AppCompatActivity() {
         tbar.title=track.trackTitle
         tv_track_title.setText(track.trackTitle)
 
-        btn_repeat.setOnClickListener({
+        btn_repeat.setOnClickListener {
             mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
-        })
+        }
 
     }
 
@@ -133,19 +133,23 @@ class AudioPlayerActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
+/*
         val intent = Intent(this, AudioService::class.java)
         intent.putExtras(getIntent())
         Util.startForegroundService(this, intent)
 
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
+*/
+
+        mMediaBrowserCompat.connect()
 
     }
 
     override fun onStop() {
         super.onStop()
 
-        unbindService(connection)
-        mBound = false
+        MediaControllerCompat.getMediaController(this)?.unregisterCallback(controllerCallback)
+        mMediaBrowserCompat.disconnect()
     }
 
 

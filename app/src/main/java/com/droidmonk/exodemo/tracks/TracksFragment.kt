@@ -60,7 +60,7 @@ class TracksFragment : Fragment() {
     private lateinit var mService: AudioService
     private var mBound: Boolean = false
 
-    private val connection = object : ServiceConnection {
+    /*private val connection = object : ServiceConnection {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as AudioService.AudioServiceBinder
@@ -71,7 +71,7 @@ class TracksFragment : Fragment() {
         override fun onServiceDisconnected(arg0: ComponentName) {
             mBound = false
         }
-    }
+    }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,7 +100,7 @@ class TracksFragment : Fragment() {
         var adapter=TracksAdapter(getTrackList())
         adapter.setOnClickListener(object : TracksAdapter.OnClickListener{
             override fun onClickAddToPlaylist(track: Track) {
-
+/*
                 if(!mBound) {
                     val intent = Intent(activity, AudioService::class.java)
                     intent.putExtra(AudioService.KEY_TRACK, track)
@@ -114,7 +114,7 @@ class TracksFragment : Fragment() {
                     mService.addAudioToPlaylist(track)
                 }
 
-            }
+       */     }
 
             override fun onClick(track: Track) {
 
@@ -300,9 +300,9 @@ class TracksFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
 
-        if(mBound) {
+      /*  if(mBound) {
             activity?.unbindService(connection)
             mBound = false
-        }
+        }*/
     }
 }
