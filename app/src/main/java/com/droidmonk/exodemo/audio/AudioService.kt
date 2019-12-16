@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.ResultReceiver
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -15,11 +16,9 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.media.MediaBrowserServiceCompat
 import com.droidmonk.exodemo.R
 import com.droidmonk.exodemo.tracks.Track
-import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.Timeline
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
+import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector.PlaybackPreparer
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
@@ -31,6 +30,8 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 class AudioService : MediaBrowserServiceCompat() {
 
     val LOG_TAG="tag"
+
+//    val demo_file="/storage/emulated/0/VoiceMusicChanger/Record_Custom_super_voice_changer_5.mp3"
 
     companion object{
          val KEY_TRACK="track"
@@ -47,7 +48,7 @@ class AudioService : MediaBrowserServiceCompat() {
     private var player: SimpleExoPlayer? = null
     private lateinit var concatenatedSource: ConcatenatingMediaSource
 
-    private lateinit var currentTrack:Track
+//    private lateinit var currentTrack:Track
 
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
@@ -58,10 +59,7 @@ class AudioService : MediaBrowserServiceCompat() {
         super.onCreate()
 
 
-
         player = ExoPlayerFactory.newSimpleInstance(this, DefaultTrackSelector())
-
-
         playerNotificationManager= PlayerNotificationManager.createWithNotificationChannel(
             applicationContext,
             PLAYBACK_CHANNEL_ID,
@@ -73,11 +71,11 @@ class AudioService : MediaBrowserServiceCompat() {
                 }
 
                 override fun getCurrentContentText(player: Player?): String? {
-                    return currentTrack.trackArtist
+                    return ""//currentTrack.trackArtist
                 }
 
                 override fun getCurrentContentTitle(player: Player?): String {
-                    return currentTrack.trackTitle
+                    return ""//currentTrack.trackTitle
                 }
 
                 override fun getCurrentLargeIcon(
@@ -125,32 +123,13 @@ class AudioService : MediaBrowserServiceCompat() {
                 override fun onPlay() {
                     val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
+
+
+
+
                     player?.setPlayWhenReady(true);
                     player?.getPlaybackState();
 
-                    // Request audio focus for playback, this registers the afChangeListener
-
-                    /*audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
-                        setOnAudioFocusChangeListener(afChangeListener)
-                        setAudioAttributes(AudioAttributes.Builder().run {
-                            setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            build()
-                        })
-                        build()
-                    }
-                    val result = am.requestAudioFocus(audioFocusRequest)
-                    if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                        // Start the service
-                        startService(Intent(this@AudioService, MediaBrowserService::class.java))
-                        // Set the session active  (and update metadata and state)
-                        mediaSession.isActive = true
-                        // start the player (custom call)
-                        player.start()
-                        // Register BECOME_NOISY BroadcastReceiver
-                        registerReceiver(myNoisyAudioStreamReceiver, intentFilter)
-                        // Put the service in the foreground, post notification
-                        service.startForeground(id, myPlayerNotification)
-                    }*/
                 }
 
                 override fun onPause() {
@@ -171,6 +150,17 @@ class AudioService : MediaBrowserServiceCompat() {
 
                 }
 
+                override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
+                    super.onPlayFromUri(uri, extras)
+
+                    val dataSourceFactory: DefaultDataSourceFactory = DefaultDataSourceFactory(this@AudioService,"Media Player")
+                    val mediaSource: ExtractorMediaSource = ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(
+                        uri)
+
+
+                    player?.prepare(mediaSource)
+                    player?.setPlayWhenReady(true)
+                }
 
             })
 
@@ -179,7 +169,7 @@ class AudioService : MediaBrowserServiceCompat() {
         }
         playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
         mediaSessionConnector= MediaSessionConnector(mediaSession)
-        mediaSessionConnector.setQueueNavigator(object : TimelineQueueNavigator(mediaSession ){
+       /* mediaSessionConnector.setQueueNavigator(object : TimelineQueueNavigator(mediaSession ){
             override fun getMediaDescription(
                 player: Player?,
                 windowIndex: Int
@@ -187,16 +177,65 @@ class AudioService : MediaBrowserServiceCompat() {
                 return player?.currentTimeline
                     ?.getWindow(windowIndex, Timeline.Window(), true)?.tag as MediaDescriptionCompat
             }
-        })
+        })*/
 
         mediaSession.isActive=true
-//        mediaSessionConnector.setPlayer(player,null)
+       mediaSessionConnector.setPlayer(player)
+        mediaSessionConnector.setPlaybackPreparer(object: MediaSessionConnector.PlaybackPreparer{
+            override fun onPrepareFromSearch(
+                query: String?,
+                playWhenReady: Boolean,
+                extras: Bundle?
+            ) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onCommand(
+                player: Player?,
+                controlDispatcher: ControlDispatcher?,
+                command: String?,
+                extras: Bundle?,
+                cb: ResultReceiver?
+            ): Boolean {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun getSupportedPrepareActions(): Long {
+                return PlaybackStateCompat.ACTION_PLAY_FROM_URI
+            }
+
+            override fun onPrepareFromMediaId(
+                mediaId: String?,
+                playWhenReady: Boolean,
+                extras: Bundle?
+            ) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onPrepareFromUri(uri: Uri?, playWhenReady: Boolean, extras: Bundle?) {
+                val dataSourceFactory: DefaultDataSourceFactory = DefaultDataSourceFactory(this@AudioService,"Media Player")
+                val mediaSource: ExtractorMediaSource = ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(
+                    uri)
+
+
+                player?.prepare(mediaSource)
+                player?.setPlayWhenReady(true)
+            }
+
+            override fun onPrepare(playWhenReady: Boolean) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+        })
+
+
+
+
     }
 
    /* override fun onBind(intent: Intent): IBinder {
         return binder
     }*/
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+/*    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
 
         val track= intent?.getParcelableExtra<Track>(KEY_TRACK)!!
@@ -212,7 +251,7 @@ class AudioService : MediaBrowserServiceCompat() {
             playAudio(track)
 
         return START_STICKY
-    }
+    }*/
 
    /* inner class AudioServiceBinder : Binder() {
         // Return this instance of LocalService so clients can call public methods
@@ -222,7 +261,7 @@ class AudioService : MediaBrowserServiceCompat() {
     fun playAudio(track: Track)
     {
 
-        currentTrack=track
+       // currentTrack=track
 
         val dataSourceFactory: DefaultDataSourceFactory = DefaultDataSourceFactory(this,"Media Player")
         val mediaSource: ExtractorMediaSource = ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(

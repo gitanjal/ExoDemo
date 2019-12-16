@@ -15,9 +15,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".audio.AudioPlayerActivity"></activity>
 
-        <service android:name=".audio.AudioService" >
+
+        <activity android:name=".audio.AudioPlayerActivity" />
+
+        <service android:name=".audio.AudioService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>

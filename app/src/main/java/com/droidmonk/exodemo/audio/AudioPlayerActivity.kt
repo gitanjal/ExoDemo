@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.media.session.PlaybackState.STATE_PAUSED
 import android.media.session.PlaybackState.STATE_PLAYING
+import android.net.Uri
 import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -37,6 +38,8 @@ class AudioPlayerActivity : AppCompatActivity() {
     private var mBound: Boolean = false
     private var mCurrentState: Int = 0
 
+    private lateinit var currentTrack:Track
+
     companion object {
         private val KEY_TRACK="track"
         fun getCallingIntent(context: Context,track: Track):Intent
@@ -67,6 +70,8 @@ class AudioPlayerActivity : AppCompatActivity() {
 
             try {
 
+
+
                 mMediaBrowserCompat.sessionToken.also{token->
                      mediaController = MediaControllerCompat(
                         this@AudioPlayerActivity, // Context
@@ -74,9 +79,12 @@ class AudioPlayerActivity : AppCompatActivity() {
                     )
                 }
 
+
+
                 MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
 
 
+                mediaController.transportControls.playFromUri(Uri.parse(currentTrack.path),Bundle())
 
                 buildTransportControls()
 
@@ -102,13 +110,15 @@ class AudioPlayerActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
 
+        currentTrack=intent.getParcelableExtra(KEY_TRACK)
+
 
         mMediaBrowserCompat = MediaBrowserCompat(
             this, ComponentName(this, AudioService::class.java),
             mediaBrowserConnectionCallback, intent.extras
         )
 
-       // mMediaBrowserCompat.connect()
+        mMediaBrowserCompat.connect()
 
 
         val track=intent.getParcelableExtra<Track>(KEY_TRACK)
@@ -141,7 +151,7 @@ class AudioPlayerActivity : AppCompatActivity() {
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
 */
 
-        mMediaBrowserCompat.connect()
+      //  mMediaBrowserCompat.connect()
 
     }
 
@@ -154,8 +164,11 @@ class AudioPlayerActivity : AppCompatActivity() {
 
 
     fun buildTransportControls() {
-        val mediaController = MediaControllerCompat.getMediaController(this@AudioPlayerActivity)
+       // val mediaController = MediaControllerCompat.getMediaController(this@AudioPlayerActivity)
         // Grab the view for the play/pause button
+
+
+
         btn_play.apply {
             setOnClickListener {
                 // Since this is a play/pause button, you'll need to test the current state
