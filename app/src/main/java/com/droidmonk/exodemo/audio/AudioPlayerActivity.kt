@@ -50,28 +50,10 @@ class AudioPlayerActivity : AppCompatActivity() {
         }
     }
 
-    /*private val connection = object : ServiceConnection {
-
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val binder = service as AudioService.AudioServiceBinder
-            mService = binder.getService()
-            mBound = true
-        }
-
-        override fun onServiceDisconnected(arg0: ComponentName) {
-            mBound = false
-        }
-    }*/
-
-
     private val mediaBrowserConnectionCallback = object : MediaBrowserCompat.ConnectionCallback(){
         override fun onConnected() {
             super.onConnected()
-
             try {
-
-
-
                 mMediaBrowserCompat.sessionToken.also{token->
                      mediaController = MediaControllerCompat(
                         this@AudioPlayerActivity, // Context
@@ -79,22 +61,14 @@ class AudioPlayerActivity : AppCompatActivity() {
                     )
                 }
 
-
-
                 MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
-
-
                 mediaController.transportControls.playFromUri(Uri.parse(currentTrack.path),Bundle())
-
                 buildTransportControls()
 
             } catch (e: RemoteException) {
-
                 Log.d("tag","Remote exception")
-
             }
         }
-
         override fun onConnectionFailed() {
             super.onConnectionFailed()
         }
@@ -112,7 +86,6 @@ class AudioPlayerActivity : AppCompatActivity() {
 
         currentTrack=intent.getParcelableExtra(KEY_TRACK)
 
-
         mMediaBrowserCompat = MediaBrowserCompat(
             this, ComponentName(this, AudioService::class.java),
             mediaBrowserConnectionCallback, intent.extras
@@ -120,16 +93,8 @@ class AudioPlayerActivity : AppCompatActivity() {
 
         mMediaBrowserCompat.connect()
 
-
         val track=intent.getParcelableExtra<Track>(KEY_TRACK)
 
-/*
-
-        btn_pause.setOnClickListener({
-
-            mediaController.transportControls.pause()
-        })
-*/
         tbar.title=track.trackTitle
         tv_track_title.setText(track.trackTitle)
 
@@ -164,11 +129,6 @@ class AudioPlayerActivity : AppCompatActivity() {
 
 
     fun buildTransportControls() {
-       // val mediaController = MediaControllerCompat.getMediaController(this@AudioPlayerActivity)
-        // Grab the view for the play/pause button
-
-
-
         btn_play.apply {
             setOnClickListener {
                 // Since this is a play/pause button, you'll need to test the current state

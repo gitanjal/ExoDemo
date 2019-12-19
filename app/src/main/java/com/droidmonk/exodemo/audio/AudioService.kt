@@ -2,12 +2,14 @@ package com.droidmonk.exodemo.audio
 
 import android.app.Notification
 import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.IBinder
 import android.os.ResultReceiver
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
@@ -29,26 +31,14 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 
 class AudioService : MediaBrowserServiceCompat() {
 
-    val LOG_TAG="tag"
-
-//    val demo_file="/storage/emulated/0/VoiceMusicChanger/Record_Custom_super_voice_changer_5.mp3"
-
-    companion object{
-         val KEY_TRACK="track"
-         val KEY_ADD_TO_PLAYLIST="add_to_playlist"
-    }
-
-
+    val LOG_TAG="AudioService"
 
     val PLAYBACK_CHANNEL_ID = "playback_channel"
     val PLAYBACK_NOTIFICATION_ID = 1
 
-//    private val binder = AudioServiceBinder()
     private var playerNotificationManager: PlayerNotificationManager? = null
     private var player: SimpleExoPlayer? = null
     private lateinit var concatenatedSource: ConcatenatingMediaSource
-
-//    private lateinit var currentTrack:Track
 
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
@@ -58,12 +48,12 @@ class AudioService : MediaBrowserServiceCompat() {
     override fun onCreate() {
         super.onCreate()
 
-
         player = ExoPlayerFactory.newSimpleInstance(this, DefaultTrackSelector())
         playerNotificationManager= PlayerNotificationManager.createWithNotificationChannel(
             applicationContext,
             PLAYBACK_CHANNEL_ID,
             R.string.foreground_service_notification_channel,
+            R.string.foreground_service_notification_channel_description,
             PLAYBACK_NOTIFICATION_ID,
             object:PlayerNotificationManager.MediaDescriptionAdapter{
                 override fun createCurrentContentIntent(player: Player?): PendingIntent? {
@@ -84,31 +74,25 @@ class AudioService : MediaBrowserServiceCompat() {
                 ): Bitmap? {
                     return null
                 }
+            },
+            object : PlayerNotificationManager.NotificationListener{
+                override fun onNotificationCancelled(notificationId: Int) {
+                    stopSelf()
+                }
+
+                override fun onNotificationStarted(notificationId: Int, notification: Notification?) {
+                    startForeground(notificationId,notification)
+                }
             }
         )
 
-        playerNotificationManager?.setNotificationListener(object : PlayerNotificationManager.NotificationListener{
-            override fun onNotificationCancelled(notificationId: Int) {
-                stopSelf()
-            }
-
-            override fun onNotificationStarted(notificationId: Int, notification: Notification?) {
-                startForeground(notificationId,notification)
-            }
-        })
-
         playerNotificationManager?.setPlayer(player)
-
-        /*media session*/
-      /*  mediaSession=MediaSessionCompat(this,"ExoDemo")
-        mediaSession.isActive=true*/
-
 
         mediaSession = MediaSessionCompat(baseContext, LOG_TAG).apply {
 
             // Enable callbacks from MediaButtons and TransportControls
             setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-                    or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+
             )
 
             // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
@@ -117,52 +101,6 @@ class AudioService : MediaBrowserServiceCompat() {
                         or PlaybackStateCompat.ACTION_PLAY_PAUSE
                 )
             setPlaybackState(stateBuilder.build())
-
-            // MySessionCallback() has methods that handle callbacks from a media controller
-            setCallback(object: MediaSessionCompat.Callback() {
-                override fun onPlay() {
-                    val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-
-
-
-
-                    player?.setPlayWhenReady(true);
-                    player?.getPlaybackState();
-
-                }
-
-                override fun onPause() {
-                    super.onPause()
-
-                    player?.setPlayWhenReady(false);
-                    player?.getPlaybackState();
-                }
-
-                override fun onSetRepeatMode(repeatMode: Int) {
-                    super.onSetRepeatMode(repeatMode)
-
-                    player?.setRepeatMode(Player.REPEAT_MODE_ALL);
-                }
-
-                override fun onSetShuffleMode(shuffleMode: Int) {
-                    super.onSetShuffleMode(shuffleMode)
-
-                }
-
-                override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
-                    super.onPlayFromUri(uri, extras)
-
-                    val dataSourceFactory: DefaultDataSourceFactory = DefaultDataSourceFactory(this@AudioService,"Media Player")
-                    val mediaSource: ExtractorMediaSource = ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(
-                        uri)
-
-
-                    player?.prepare(mediaSource)
-                    player?.setPlayWhenReady(true)
-                }
-
-            })
 
             // Set the session's token so that client activities can communicate with it.
             setSessionToken(sessionToken)
@@ -180,7 +118,7 @@ class AudioService : MediaBrowserServiceCompat() {
         })*/
 
         mediaSession.isActive=true
-       mediaSessionConnector.setPlayer(player)
+        mediaSessionConnector.setPlayer(player)
         mediaSessionConnector.setPlaybackPreparer(object: MediaSessionConnector.PlaybackPreparer{
             override fun onPrepareFromSearch(
                 query: String?,
@@ -213,6 +151,7 @@ class AudioService : MediaBrowserServiceCompat() {
             }
 
             override fun onPrepareFromUri(uri: Uri?, playWhenReady: Boolean, extras: Bundle?) {
+
                 val dataSourceFactory: DefaultDataSourceFactory = DefaultDataSourceFactory(this@AudioService,"Media Player")
                 val mediaSource: ExtractorMediaSource = ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(
                     uri)
@@ -232,31 +171,7 @@ class AudioService : MediaBrowserServiceCompat() {
 
     }
 
-   /* override fun onBind(intent: Intent): IBinder {
-        return binder
-    }*/
-/*    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-
-        val track= intent?.getParcelableExtra<Track>(KEY_TRACK)!!
-        val addToPlayList=intent.getBooleanExtra(KEY_ADD_TO_PLAYLIST,false)
-        if(addToPlayList) {
-
-            if(isPlaying())
-                addAudioToPlaylist(track)
-            else
-                playAudio(track)
-        }
-        else
-            playAudio(track)
-
-        return START_STICKY
-    }*/
-
-   /* inner class AudioServiceBinder : Binder() {
-        // Return this instance of LocalService so clients can call public methods
-        fun getService(): AudioService = this@AudioService
-    }*/
 
     fun playAudio(track: Track)
     {
@@ -310,7 +225,9 @@ class AudioService : MediaBrowserServiceCompat() {
     ): BrowserRoot? {
         // (Optional) Control the level of access for the specified package name.
         // You'll need to write your own logic to do this.
-        return if (/*allowBrowsing(clientPackageName, clientUid)*/true) {
+        return if (
+/*allowBrowsing(clientPackageName, clientUid)*/
+true) {
             // Returns a root ID that clients can use with onLoadChildren() to retrieve
             // the content hierarchy.
             BrowserRoot("Hi", null)
@@ -324,7 +241,7 @@ class AudioService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
         mediaSession.release()
-//        mediaSessionConnector.setPlayer(null,null)
+        mediaSessionConnector.setPlayer(null)
         playerNotificationManager?.setPlayer(null)
         player?.release()
         player=null

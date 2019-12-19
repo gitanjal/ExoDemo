@@ -14,6 +14,12 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
+import android.os.RemoteException
+import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +34,7 @@ import com.droidmonk.exodemo.audio.AudioPlayerActivity
 import com.droidmonk.exodemo.audio.AudioService
 import com.google.android.exoplayer2.util.MimeTypes.isAudio
 import com.google.android.exoplayer2.util.Util
+import kotlinx.android.synthetic.main.activity_audio_player.*
 import kotlinx.android.synthetic.main.fragment_tracks.*
 import java.util.*
 
@@ -60,18 +67,34 @@ class TracksFragment : Fragment() {
     private lateinit var mService: AudioService
     private var mBound: Boolean = false
 
-    /*private val connection = object : ServiceConnection {
+    private lateinit var mMediaBrowserCompat: MediaBrowserCompat
+    private lateinit var mediaController: MediaControllerCompat
 
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val binder = service as AudioService.AudioServiceBinder
-            mService = binder.getService()
-            mBound = true
+
+    private val mediaBrowserConnectionCallback = object : MediaBrowserCompat.ConnectionCallback(){
+        override fun onConnected() {
+            super.onConnected()
+            try {
+                mMediaBrowserCompat.sessionToken.also{token->
+                    mediaController = MediaControllerCompat(
+                        activity, // Context
+                        token
+                    )
+                }
+
+                MediaControllerCompat.setMediaController(activity!!, mediaController)
+
+//                buildTransportControls()
+
+            } catch (e: RemoteException) {
+                Log.d("tag","Remote exception")
+            }
         }
 
-        override fun onServiceDisconnected(arg0: ComponentName) {
-            mBound = false
+        override fun onConnectionFailed() {
+            super.onConnectionFailed()
         }
-    }*/
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,6 +116,14 @@ class TracksFragment : Fragment() {
 
         checkPermission()
 
+        mMediaBrowserCompat = MediaBrowserCompat(
+            activity, ComponentName(activity, AudioService::class.java),
+            mediaBrowserConnectionCallback, activity?.intent?.extras
+        )
+
+        mMediaBrowserCompat.connect()
+
+
     }
 
     private fun setUpTrackList() {
@@ -100,21 +131,9 @@ class TracksFragment : Fragment() {
         var adapter=TracksAdapter(getTrackList())
         adapter.setOnClickListener(object : TracksAdapter.OnClickListener{
             override fun onClickAddToPlaylist(track: Track) {
-/*
-                if(!mBound) {
-                    val intent = Intent(activity, AudioService::class.java)
-                    intent.putExtra(AudioService.KEY_TRACK, track)
-                    intent.putExtra(AudioService.KEY_ADD_TO_PLAYLIST,true)
-                    Util.startForegroundService(activity, intent)
 
-                    activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
-                }
-                else
-                {
-                    mService.addAudioToPlaylist(track)
-                }
-
-       */     }
+                mediaController.transportControls.playFromUri(Uri.parse(track.path),Bundle().apply { putBoolean("playlist",true) })
+               }
 
             override fun onClick(track: Track) {
 
@@ -305,4 +324,35 @@ class TracksFragment : Fragment() {
             mBound = false
         }*/
     }
+
+/*
+    fun buildTransportControls() {
+        btn_play.apply {
+            setOnClickListener {
+                // Since this is a play/pause button, you'll need to test the current state
+                // and choose the action accordingly
+
+                val pbState = mediaController.playbackState.state
+                if (pbState == PlaybackStateCompat.STATE_PLAYING) {
+                    btn_play.background=resources.getDrawable(R.drawable.ic_pause)
+                    mediaController.transportControls.pause()
+                } else {
+                    btn_play.background=resources.getDrawable(R.drawable.ic_play)
+                    mediaController.transportControls.play()
+                }
+            }
+        }
+
+        // Register a Callback to stay in sync
+        mediaController.registerCallback(controllerCallback)
+    }
+*/
+
+    private var controllerCallback = object : MediaControllerCompat.Callback() {
+
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {}
+
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {}
+    }
+
 }
