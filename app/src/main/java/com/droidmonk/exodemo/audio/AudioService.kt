@@ -6,7 +6,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.AudioManager
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
@@ -24,6 +26,7 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector.Play
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
@@ -33,7 +36,7 @@ class AudioService : MediaBrowserServiceCompat() {
 
     val LOG_TAG="AudioService"
 
-    val PLAYBACK_CHANNEL_ID = "playback_channel"
+    val PLAYBACK_CHANNEL_ID = "audio_channel"
     val PLAYBACK_NOTIFICATION_ID = 1
 
     private var playerNotificationManager: PlayerNotificationManager? = null
@@ -44,6 +47,8 @@ class AudioService : MediaBrowserServiceCompat() {
     private lateinit var mediaSessionConnector: MediaSessionConnector
 
     private lateinit var stateBuilder: PlaybackStateCompat.Builder
+
+    private var currentTrack:Track? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -57,22 +62,33 @@ class AudioService : MediaBrowserServiceCompat() {
             PLAYBACK_NOTIFICATION_ID,
             object:PlayerNotificationManager.MediaDescriptionAdapter{
                 override fun createCurrentContentIntent(player: Player?): PendingIntent? {
-                    return null
+                    var intent=AudioPlayerActivity.getCallingIntent(this@AudioService,null)
+                    return PendingIntent.getActivity(this@AudioService,0,intent,PendingIntent.FLAG_UPDATE_CURRENT)
                 }
 
                 override fun getCurrentContentText(player: Player?): String? {
-                    return ""//currentTrack.trackArtist
+                    return currentTrack?.trackArtist
                 }
 
                 override fun getCurrentContentTitle(player: Player?): String {
-                    return ""//currentTrack.trackTitle
+                    return currentTrack?.trackTitle?:"Unknown"
                 }
 
                 override fun getCurrentLargeIcon(
                     player: Player?,
                     callback: PlayerNotificationManager.BitmapCallback?
                 ): Bitmap? {
-                    return null
+
+                    var mediaDataRetriever= MediaMetadataRetriever()
+                    mediaDataRetriever.setDataSource(this@AudioService,Uri.parse(currentTrack?.path))
+
+                    var songImage: Bitmap?=null
+                    mediaDataRetriever.embeddedPicture?.let {
+
+                        val albumArt:ByteArray=mediaDataRetriever.embeddedPicture
+                        songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
+                    }
+                    return songImage
                 }
             },
             object : PlayerNotificationManager.NotificationListener{
@@ -88,10 +104,10 @@ class AudioService : MediaBrowserServiceCompat() {
 
         playerNotificationManager?.setPlayer(player)
 
-        mediaSession = MediaSessionCompat(baseContext, LOG_TAG).apply {
+        mediaSession = MediaSessionCompat(baseContext, LOG_TAG)/*.apply {
 
             // Enable callbacks from MediaButtons and TransportControls
-            setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+     *//*       setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
 
             )
 
@@ -100,22 +116,27 @@ class AudioService : MediaBrowserServiceCompat() {
                 .setActions(PlaybackStateCompat.ACTION_PLAY
                         or PlaybackStateCompat.ACTION_PLAY_PAUSE
                 )
-            setPlaybackState(stateBuilder.build())
+            setPlaybackState(stateBuilder.build())*//*
 
             // Set the session's token so that client activities can communicate with it.
             setSessionToken(sessionToken)
         }
+*/
+        sessionToken=mediaSession.sessionToken
+
         playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
         mediaSessionConnector= MediaSessionConnector(mediaSession)
-       /* mediaSessionConnector.setQueueNavigator(object : TimelineQueueNavigator(mediaSession ){
+        mediaSessionConnector.setQueueNavigator(object : TimelineQueueNavigator(mediaSession ){
             override fun getMediaDescription(
                 player: Player?,
                 windowIndex: Int
             ): MediaDescriptionCompat {
-                return player?.currentTimeline
-                    ?.getWindow(windowIndex, Timeline.Window(), true)?.tag as MediaDescriptionCompat
+                return MediaDescriptionCompat.Builder()
+                    .setTitle(currentTrack?.trackTitle)
+                    .setIconUri(Uri.parse(currentTrack?.path))
+                    .build()
             }
-        })*/
+        })
 
         mediaSession.isActive=true
         mediaSessionConnector.setPlayer(player)
@@ -136,6 +157,8 @@ class AudioService : MediaBrowserServiceCompat() {
                 cb: ResultReceiver?
             ): Boolean {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+
             }
 
             override fun getSupportedPrepareActions(): Long {
@@ -152,13 +175,21 @@ class AudioService : MediaBrowserServiceCompat() {
 
             override fun onPrepareFromUri(uri: Uri?, playWhenReady: Boolean, extras: Bundle?) {
 
-                val dataSourceFactory: DefaultDataSourceFactory = DefaultDataSourceFactory(this@AudioService,"Media Player")
-                val mediaSource: ExtractorMediaSource = ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(
-                    uri)
+                val trackToPlay:Track?=extras?.getParcelable("track")
+                if(trackToPlay!=null && !trackToPlay?.path.equals(currentTrack?.path)) {
+                    currentTrack = extras?.getParcelable("track")
+
+                    val dataSourceFactory: DefaultDataSourceFactory =
+                        DefaultDataSourceFactory(this@AudioService, "Media Player")
+                    val mediaSource: ProgressiveMediaSource =
+                        ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(
+                            uri
+                        )
 
 
-                player?.prepare(mediaSource)
-                player?.setPlayWhenReady(true)
+                    player?.prepare(mediaSource)
+                    player?.setPlayWhenReady(true)
+                }
             }
 
             override fun onPrepare(playWhenReady: Boolean) {
@@ -218,24 +249,15 @@ class AudioService : MediaBrowserServiceCompat() {
         result.sendResult(null)
     }
 
+
     override fun onGetRoot(
         clientPackageName: String,
         clientUid: Int,
         rootHints: Bundle?
     ): BrowserRoot? {
-        // (Optional) Control the level of access for the specified package name.
-        // You'll need to write your own logic to do this.
-        return if (
-/*allowBrowsing(clientPackageName, clientUid)*/
-true) {
-            // Returns a root ID that clients can use with onLoadChildren() to retrieve
-            // the content hierarchy.
-            BrowserRoot("Hi", null)
-        } else {
-            // Clients can connect, but this BrowserRoot is an empty hierachy
-            // so onLoadChildren returns nothing. This disables the ability to browse for content.
-            BrowserRoot("hi", null)
-        }
+
+        return BrowserRoot("empty_root", null)
+
     }
 
 

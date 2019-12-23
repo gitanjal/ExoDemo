@@ -17,7 +17,9 @@
         android:usesCleartextTraffic="true">
 
 
-        <activity android:name=".audio.AudioPlayerActivity" />
+        <activity android:name=".audio.AudioPlayerActivity"
+            android:launchMode="singleTop"
+            />
 
         <service android:name=".audio.AudioService">
             <intent-filter>
@@ -33,11 +35,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".VideoPlayerActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
     </application>
 

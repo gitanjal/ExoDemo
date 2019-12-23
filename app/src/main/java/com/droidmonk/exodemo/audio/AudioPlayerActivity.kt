@@ -3,74 +3,76 @@ package com.droidmonk.exodemo.audio
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
-import android.media.session.PlaybackState.STATE_PAUSED
-import android.media.session.PlaybackState.STATE_PLAYING
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.MediaMetadataCompat.*
 import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import com.droidmonk.exodemo.R
 import com.droidmonk.exodemo.tracks.Track
-import com.droidmonk.exodemo.tracks.TracksActivity
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.activity_audio_player.*
-import kotlinx.android.synthetic.main.activity_tracks.*
-import kotlinx.android.synthetic.main.app_bar.*
-import java.io.IOException
 
 
 class AudioPlayerActivity : AppCompatActivity() {
 
-    private val STATE_PAUSED = 0
-    private val STATE_PLAYING = 1
+    private val TAG = "AudioPlayerActivity"
 
     private lateinit var mMediaBrowserCompat: MediaBrowserCompat
     private lateinit var mediaController: MediaControllerCompat
-    private lateinit var mService: AudioService
-    private var mBound: Boolean = false
-    private var mCurrentState: Int = 0
+    private lateinit var tbar: Toolbar
 
-    private lateinit var currentTrack:Track
+    private var currentTrack: Track? = null
 
     companion object {
-        private val KEY_TRACK="track"
-        fun getCallingIntent(context: Context,track: Track):Intent
-        {
-            var intent=Intent(context,AudioPlayerActivity::class.java)
-            intent.putExtra(KEY_TRACK,track)
+        private val KEY_TRACK = "track"
+        fun getCallingIntent(context: Context, track: Track?): Intent {
+            var intent = Intent(context, AudioPlayerActivity::class.java)
+            intent.putExtra(KEY_TRACK, track)
+            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             return intent
         }
     }
 
-    private val mediaBrowserConnectionCallback = object : MediaBrowserCompat.ConnectionCallback(){
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        Log.d(TAG, "Inside onNewIntent")
+
+        currentTrack = intent?.getParcelableExtra(KEY_TRACK)
+
+    }
+
+    private val mediaBrowserConnectionCallback = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
             super.onConnected()
             try {
-                mMediaBrowserCompat.sessionToken.also{token->
-                     mediaController = MediaControllerCompat(
-                        this@AudioPlayerActivity, // Context
-                        token
-                    )
-                }
 
-                MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
-                mediaController.transportControls.playFromUri(Uri.parse(currentTrack.path),Bundle())
+                mediaController = MediaControllerCompat(
+                    this@AudioPlayerActivity, // Context
+                    mMediaBrowserCompat.sessionToken
+                )
+
+//                MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
+                // MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
+                // Register a Callback to stay in sync
+                mediaController.registerCallback(mediaControllerCallback)
+
+                initialiseUIStates(mediaController.metadata,mediaController.playbackState)
+
                 buildTransportControls()
 
+
             } catch (e: RemoteException) {
-                Log.d("tag","Remote exception")
+                Log.d("tag", "Remote exception")
             }
-        }
-        override fun onConnectionFailed() {
-            super.onConnectionFailed()
         }
     }
 
@@ -78,29 +80,25 @@ class AudioPlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_audio_player)
 
-        val tbar:androidx.appcompat.widget.Toolbar=findViewById(R.id.app_bar)
+        Log.d(TAG, "Inside onCreate")
+
+        tbar = findViewById(R.id.app_bar)
 
         setSupportActionBar(tbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
 
-        currentTrack=intent.getParcelableExtra(KEY_TRACK)
+        currentTrack = intent.getParcelableExtra(KEY_TRACK)
 
         mMediaBrowserCompat = MediaBrowserCompat(
             this, ComponentName(this, AudioService::class.java),
-            mediaBrowserConnectionCallback, intent.extras
+            mediaBrowserConnectionCallback, null
         )
 
-        mMediaBrowserCompat.connect()
+//        mMediaBrowserCompat.connect()
 
-        val track=intent.getParcelableExtra<Track>(KEY_TRACK)
+        val track = intent.getParcelableExtra<Track>(KEY_TRACK)
 
-        tbar.title=track.trackTitle
-        tv_track_title.setText(track.trackTitle)
-
-        btn_repeat.setOnClickListener {
-            mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
-        }
 
     }
 
@@ -108,60 +106,109 @@ class AudioPlayerActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-/*
-        val intent = Intent(this, AudioService::class.java)
-        intent.putExtras(getIntent())
-        Util.startForegroundService(this, intent)
+        mMediaBrowserCompat.connect()
 
-        bindService(intent, connection, Context.BIND_AUTO_CREATE)
-*/
-
-      //  mMediaBrowserCompat.connect()
+        Log.d(TAG, "Inside onStart")
 
     }
 
     override fun onStop() {
         super.onStop()
 
-        MediaControllerCompat.getMediaController(this)?.unregisterCallback(controllerCallback)
+        mediaController.unregisterCallback(mediaControllerCallback)
         mMediaBrowserCompat.disconnect()
     }
 
 
     fun buildTransportControls() {
-        btn_play.apply {
+
+        if (currentTrack != null)
+            mediaController.transportControls.playFromUri(
+                Uri.parse(currentTrack?.path),
+                Bundle().apply { putParcelable("track", currentTrack) })
+
+        btn_play_pause.apply {
             setOnClickListener {
                 // Since this is a play/pause button, you'll need to test the current state
                 // and choose the action accordingly
 
                 val pbState = mediaController.playbackState.state
                 if (pbState == PlaybackStateCompat.STATE_PLAYING) {
-                    btn_play.background=resources.getDrawable(R.drawable.ic_pause)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        btn_play_pause.background = resources.getDrawable(R.drawable.ic_play, theme)
+                    } else {
+                        btn_play_pause.background = resources.getDrawable(R.drawable.ic_play)
+                    }
                     mediaController.transportControls.pause()
                 } else {
-                    btn_play.background=resources.getDrawable(R.drawable.ic_play)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        btn_play_pause.background =
+                            resources.getDrawable(R.drawable.ic_pause, theme)
+                    } else {
+                        btn_play_pause.background = resources.getDrawable(R.drawable.ic_pause)
+                    }
                     mediaController.transportControls.play()
                 }
             }
         }
 
-        // Display the initial state
-        val metadata = mediaController.metadata
-        val pbState = mediaController.playbackState
+        btn_repeat.setOnClickListener {
+            mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
+        }
 
-        // Register a Callback to stay in sync
-        mediaController.registerCallback(controllerCallback)
     }
 
-    private var controllerCallback = object : MediaControllerCompat.Callback() {
+    private var mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
-        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {}
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
 
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {}
+            metadata?.apply { updateMetaData(metadata) }
+        }
+
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+
+            state?.apply { updateUIStates(state) }
+
+        }
     }
 
 
+    fun updateMetaData(metadata: MediaMetadataCompat) {
+        tbar.title = metadata.getString(METADATA_KEY_TITLE)
+        tv_track_title.setText(metadata.getString(METADATA_KEY_TITLE))
 
+
+        val mediaDataRetriever = MediaMetadataRetriever()
+
+
+        val uriIcon = metadata.description?.iconUri
+
+        if (uriIcon != null) {
+            mediaDataRetriever.setDataSource(this@AudioPlayerActivity, uriIcon)
+
+            var songImage: Bitmap? = null
+            mediaDataRetriever.embeddedPicture?.let {
+
+                val albumArt: ByteArray = mediaDataRetriever.embeddedPicture
+                songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
+            }
+            img_album_art.setImageBitmap(songImage)
+        }
+    }
+
+    fun updateUIStates(state: PlaybackStateCompat) {
+        if (state?.state == PlaybackStateCompat.STATE_PLAYING) {
+            btn_play_pause.background = resources.getDrawable(R.drawable.ic_pause)
+        } else {
+            btn_play_pause.background = resources.getDrawable(R.drawable.ic_play)
+        }
+
+    }
+
+    fun initialiseUIStates(metadata: MediaMetadataCompat?, state: PlaybackStateCompat?) {
+        metadata?.apply { updateMetaData(metadata) }
+        state?.apply { updateUIStates(state) }
+    }
 
 
 }

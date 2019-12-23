@@ -36,6 +36,7 @@ import com.google.android.exoplayer2.util.MimeTypes.isAudio
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.activity_audio_player.*
 import kotlinx.android.synthetic.main.fragment_tracks.*
+import java.io.File
 import java.util.*
 
 
@@ -148,6 +149,7 @@ class TracksFragment : Fragment() {
                 }
                 else
                 {
+
                     startActivity(Intent(activity, VideoPlayerActivity::class.java).putExtra("track",track))
                 }
             }
@@ -239,7 +241,8 @@ class TracksFragment : Fragment() {
                 val thisPath=musicCursor.getString(dataColumn)
 
                 var mediaDataRetriever= MediaMetadataRetriever()
-                mediaDataRetriever.setDataSource(thisPath)
+
+                mediaDataRetriever.setDataSource(activity,Uri.parse(thisPath))
 
                 var songImage:Bitmap?=null
                 mediaDataRetriever.embeddedPicture?.let {
@@ -247,7 +250,7 @@ class TracksFragment : Fragment() {
                     val albumArt:ByteArray=mediaDataRetriever.embeddedPicture
                     songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
                 }
-                trackList.add(Track(thisId, thisTitle, thisArtist,thisPath,null,songImage))
+                trackList.add(Track(thisId, thisTitle, thisArtist,thisPath,null,null))
             } while (musicCursor.moveToNext())
         }
 
