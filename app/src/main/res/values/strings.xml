@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">ExoDemo</string>
-    <string name="video_url">https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4</string>
-    <string name="ad_tag">https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&amp;iu=/124319096/external/ad_rule_samples&amp;ciu_szs=300x250&amp;ad_rule=1&amp;impl=s&amp;gdfp_req=1&amp;env=vp&amp;output=vmap&amp;unviewed_position_start=1&amp;cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostpod&amp;cmsid=496&amp;vid=short_onecue&amp;correlator=</string>
+<!--    <string name="video_url">https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4</string>-->
+    <string name="video_url">/storage/emulated/0/Movies/malvan.mp4</string>
+    <string name="ad_tag">https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&amp;iu=/124319096/external/ad_rule_samples&amp;ciu_szs=300x250&amp;ad_rule=1&amp;impl=s&amp;gdfp_req=1&amp;env=vp&amp;output=vmap&amp;unviewed_position_start=1&amp;cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostlongpod&amp;cmsid=496&amp;vid=short_tencue&amp;correlator=</string>
 </resources>
