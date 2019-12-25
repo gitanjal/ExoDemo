@@ -31,6 +31,38 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         adsLoader = ImaAdsLoader(this, Uri.parse(resources.getString(R.string.ad_tag)))
+
+        btn_speed.setOnClickListener {
+            val popup = PopupMenu(this, it)
+            val inflater: MenuInflater = popup.menuInflater
+            inflater.inflate(R.menu.playback_speed, popup.menu)
+            popup.show()
+
+            popup.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.half_x -> {
+                        player?.playbackParameters = PlaybackParameters(0.5f)
+                        true
+                    }
+                    R.id.one_x -> {
+                        player?.playbackParameters = PlaybackParameters(1f)
+                        true
+                    }
+                    R.id.two_x -> {
+                        player?.playbackParameters = PlaybackParameters(2f)
+                        true
+                    }
+                    R.id.three_x -> {
+                        player?.playbackParameters = PlaybackParameters(3f)
+                        true
+                    }
+                    else -> {
+                        Toast.makeText(this, "Invalid option ", Toast.LENGTH_LONG).show()
+                        true
+                    }
+                }
+            }
+        }
     }
 
     override fun onStart() {
@@ -54,41 +86,12 @@ class MainActivity : AppCompatActivity() {
         player?.prepare(adsMediaSource)
         player?.setPlayWhenReady(true)
 
-
-
-        btn_speed.setOnClickListener {
-            val popup = PopupMenu(this, it)
-            val inflater: MenuInflater = popup.menuInflater
-            inflater.inflate(R.menu.playback_speed, popup.menu)
-            popup.show()
-
-            popup.setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.one_x -> {
-                        player?.playbackParameters = PlaybackParameters(1f)
-                        true
-                    }
-                    R.id.two_x -> {
-                        player?.playbackParameters = PlaybackParameters(2f)
-                        true
-                    }
-                    R.id.three_x -> {
-                        player?.playbackParameters = PlaybackParameters(3f)
-                        true
-                    }
-                    else -> {
-                        Toast.makeText(this, "Invalid option ", Toast.LENGTH_LONG).show()
-                        true
-                    }
-                }
-            }
-        }
     }
 
 
     override fun onStop() {
 
-
+        adsLoader?.setPlayer(null)
         player_view.setPlayer(null)
         player?.release()
         player = null
@@ -96,9 +99,4 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-
-        adsLoader?.setPlayer(null)
-    }
 }
