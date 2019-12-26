@@ -71,16 +71,24 @@ class VideoPlayerActivity : AppCompatActivity() {
             popup.setOnMenuItemClickListener {
 
                 when (it.itemId) {
+                    R.id.half_x -> {
+                        player?.playbackParameters = PlaybackParameters(0.5f)
+                        btn_speed.text="0.5x"
+                        true
+                    }
                     R.id.one_x -> {
                         player?.playbackParameters = PlaybackParameters(1f)
+                        btn_speed.text="1x"
                         true
                     }
                     R.id.two_x -> {
                         player?.playbackParameters = PlaybackParameters(2f)
+                        btn_speed.text="2x"
                         true
                     }
                     R.id.three_x -> {
                         player?.playbackParameters = PlaybackParameters(3f)
+                        btn_speed.text="3x"
                         true
                     }
                     else -> {
