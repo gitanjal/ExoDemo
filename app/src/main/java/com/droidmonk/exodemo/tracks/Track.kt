@@ -4,7 +4,12 @@ import android.graphics.Bitmap
 import android.os.Parcel
 import android.os.Parcelable
 
-data class Track (val trackId:Long, val trackTitle:String, val trackArtist:String?, val path:String, val extension:String?, val albumArt:Bitmap?):Parcelable {
+data class Track (val trackId:Long,
+                  val trackTitle:String,
+                  val trackArtist:String?,
+                  val path:String,
+                  val extension:String?,
+                  val albumArt:Bitmap?):Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readLong(),
         parcel.readString(),

@@ -61,7 +61,6 @@ class VideoPlayerActivity : AppCompatActivity() {
 
 
         btn_speed.setOnClickListener {
-            //  Toast.makeText(it.context,"Click speed controll",Toast.LENGTH_LONG).show()
 
             val popup = PopupMenu(this, it)
             val inflater: MenuInflater = popup.menuInflater
@@ -108,7 +107,6 @@ class VideoPlayerActivity : AppCompatActivity() {
             else ->
                 throw IllegalStateException("Unsupported type: $type")
         }
-       // return ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
     }
 
 

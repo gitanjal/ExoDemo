@@ -42,23 +42,18 @@ class TracksActivity : AppCompatActivity() {
             {
                 R.id.menu_local_audio->{
                     type=TracksFragment.TYPE_AUDIO_LOCAL
-                    true
                 }
                 R.id.menu_local_video->{
                     type=TracksFragment.TYPE_VIDEO_LOCAL
-                    true
                 }
                 R.id.menu_web_audio->{
                     type=TracksFragment.TYPE_AUDIO_WEB
-                    true
                 }
                 R.id.menu_web_video->{
                     type=TracksFragment.TYPE_VIDEO_WEB
-                    true
                 }
                 else->{
                     type=TracksFragment.TYPE_AUDIO_LOCAL
-                    true
                 }
             }
 

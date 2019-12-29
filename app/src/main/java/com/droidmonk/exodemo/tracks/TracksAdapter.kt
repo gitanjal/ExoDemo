@@ -1,11 +1,9 @@
 package com.droidmonk.exodemo.tracks
 
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.droidmonk.exodemo.VideoPlayerActivity
 import com.droidmonk.exodemo.R
 import kotlinx.android.synthetic.main.item_track.view.*
 
@@ -19,7 +17,7 @@ class TracksAdapter(val tracks:ArrayList<Track>) : RecyclerView.Adapter<TracksAd
 
     private lateinit var listener:OnClickListener
 
-    public fun setOnClickListener(listener:OnClickListener)
+    fun setOnClickListener(listener:OnClickListener)
     {
         this.listener=listener
     }

@@ -14,7 +14,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -28,16 +27,16 @@ class TracksFragment : Fragment() {
 
     private val REQUEST_READ_EXTERNAL_STORAGE: Int = 1
 
-    companion object{
-        val TYPE_AUDIO_LOCAL=1
-        val TYPE_VIDEO_LOCAL=2
-        val TYPE_VIDEO_WEB=3
-        val TYPE_AUDIO_WEB=4
+    companion object {
+        val TYPE_AUDIO_LOCAL = 1
+        val TYPE_VIDEO_LOCAL = 2
+        val TYPE_VIDEO_WEB = 3
+        val TYPE_AUDIO_WEB = 4
 
-        val KEY_TYPE="key"
+        val KEY_TYPE = "key"
 
         @JvmStatic
-        fun newInstance(type:Int) =
+        fun newInstance(type: Int) =
             TracksFragment().apply {
                 arguments = Bundle().apply {
                     putInt(KEY_TYPE, type)
@@ -45,34 +44,40 @@ class TracksFragment : Fragment() {
             }
     }
 
-    val getTracksAsyncCallback= object : GetTracksAsyncTask.GetTracksCallback{
+    val getTracksAsyncCallback = object : GetTracksAsyncTask.GetTracksCallback {
         override fun setUpTrackList(tracks: ArrayList<Track>) {
-            val adapter=TracksAdapter(tracks)
-            adapter.setOnClickListener(object : TracksAdapter.OnClickListener{
+            val adapter = TracksAdapter(tracks)
+            adapter.setOnClickListener(object : TracksAdapter.OnClickListener {
                 override fun onClickAddToPlaylist(track: Track) {
 
                 }
 
                 override fun onClick(track: Track) {
 
-                    activity?.startActivity(Intent(activity, VideoPlayerActivity::class.java).putExtra("track",track))
+                    activity?.startActivity(
+                        Intent(
+                            activity,
+                            VideoPlayerActivity::class.java
+                        ).putExtra("track", track)
+                    )
                 }
             })
-            list.layoutManager= LinearLayoutManager(activity)
-            list.adapter=adapter
+            list.layoutManager = LinearLayoutManager(activity)
+            list.adapter = adapter
         }
     }
 
-    var trackType:Int=TYPE_AUDIO_LOCAL   //default
-    lateinit var getTrackAsyncTask:GetTracksAsyncTask
+    var trackType: Int = TYPE_AUDIO_LOCAL   //default
+    lateinit var getTrackAsyncTask: GetTracksAsyncTask
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        trackType= arguments?.getInt(KEY_TYPE)?: TYPE_AUDIO_LOCAL
-        getTrackAsyncTask=GetTracksAsyncTask(activity!!,trackType,getTracksAsyncCallback)
+        trackType = arguments?.getInt(KEY_TYPE) ?: TYPE_AUDIO_LOCAL
+        getTrackAsyncTask = GetTracksAsyncTask(activity!!, trackType, getTracksAsyncCallback)
 
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -88,26 +93,35 @@ class TracksFragment : Fragment() {
 
     }
 
-    private fun checkPermission()
-    {
-        if (ContextCompat.checkSelfPermission(activity!!,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
+    private fun checkPermission() {
+        if (ContextCompat.checkSelfPermission(
+                activity!!,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activity!!,
-                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    activity!!,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+            ) {
             } else {
-                ActivityCompat.requestPermissions(activity!!,
+                ActivityCompat.requestPermissions(
+                    activity!!,
                     arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    REQUEST_READ_EXTERNAL_STORAGE)
+                    REQUEST_READ_EXTERNAL_STORAGE
+                )
             }
         } else {
             getTrackAsyncTask.execute()
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
         when (requestCode) {
             REQUEST_READ_EXTERNAL_STORAGE -> {
                 // If request is cancelled, the result arrays are empty.
@@ -125,14 +139,18 @@ class TracksFragment : Fragment() {
     }
 
 
-    class GetTracksAsyncTask(context: Activity, private val trackType:Int, callback:GetTracksCallback):AsyncTask<Void,Void,ArrayList<Track>>(){
+    class GetTracksAsyncTask(
+        context: Activity,
+        private val trackType: Int,
+        callback: GetTracksCallback
+    ) : AsyncTask<Void, Void, ArrayList<Track>>() {
 
-        interface GetTracksCallback{
-           fun setUpTrackList(tracks:ArrayList<Track>)
+        interface GetTracksCallback {
+            fun setUpTrackList(tracks: ArrayList<Track>)
         }
 
         private val context: WeakReference<Activity> = WeakReference(context)
-        private val callback:WeakReference<GetTracksCallback> = WeakReference(callback)
+        private val callback: WeakReference<GetTracksCallback> = WeakReference(callback)
 
         override fun doInBackground(vararg params: Void?): ArrayList<Track> {
             return getTrackList()
@@ -144,36 +162,76 @@ class TracksFragment : Fragment() {
             result?.let { callback.get()?.setUpTrackList(it) }
         }
 
-        private fun getTrackList(): ArrayList<Track>
-                = when(trackType)
-        {
-            TYPE_AUDIO_LOCAL->getLocalAudio()
-            TYPE_VIDEO_LOCAL->getLocalVideo()
-            TYPE_VIDEO_WEB->getWebVideo()
-            TYPE_AUDIO_WEB->getWebAudio()
-            else->ArrayList<Track>()
+        private fun getTrackList(): ArrayList<Track> = when (trackType) {
+            TYPE_AUDIO_LOCAL -> getLocalAudio()
+            TYPE_VIDEO_LOCAL -> getLocalVideo()
+            TYPE_VIDEO_WEB -> getWebVideo()
+            TYPE_AUDIO_WEB -> getWebAudio()
+            else -> ArrayList<Track>()
         }
 
-        private fun getWebVideo():ArrayList<Track> {
+        private fun getWebVideo(): ArrayList<Track> {
 
-            val trackMP4=Track(1,"Simple MP4","Artist 1", context.get()?.resources!!.getString(R.string.media_url_mp4),null,null)
-            val trackDASH=Track(1,"Simple DASH","Artist 1", context.get()?.resources!!.getString(R.string.media_url_dash),"mpd",null)
+            val trackMP4 = Track(
+                1,
+                "Simple MP4",
+                "Artist 1",
+                context.get()?.resources!!.getString(R.string.media_url_mp4),
+                null,
+                null
+            )
+            val trackDASH = Track(
+                1,
+                "Simple DASH",
+                "Artist 1",
+                context.get()?.resources!!.getString(R.string.media_url_dash),
+                "mpd",
+                null
+            )
 
-            return arrayListOf(trackMP4,trackDASH)
+            return arrayListOf(trackMP4, trackDASH)
         }
 
-        private fun getWebAudio():ArrayList<Track> {
+        private fun getWebAudio(): ArrayList<Track> {
 
-            val trackMP4=Track(1,"Guitar solo","Unknown Artist", context.get()?.resources!!.getString(R.string.media_url_mp4),null,null)
-            val trackDASH=Track(1,"Guitar fingerstyle","Unknown Artist", context.get()?.resources!!.getString(R.string.media_url_dash),null,null)
-            val trackMP41=Track(1,"C progression","Unknown Artist", context.get()?.resources!!.getString(R.string.media_url_mp4),null,null)
-            val trackDASH2=Track(1,"Do re mi","Unknown Artist", context.get()?.resources!!.getString(R.string.media_url_dash),null,null)
+            val trackMP4 = Track(
+                1,
+                "Guitar solo",
+                "Unknown Artist",
+                context.get()?.resources!!.getString(R.string.media_url_mp4),
+                null,
+                null
+            )
+            val trackDASH = Track(
+                1,
+                "Guitar fingerstyle",
+                "Unknown Artist",
+                context.get()?.resources!!.getString(R.string.media_url_dash),
+                null,
+                null
+            )
+            val trackMP41 = Track(
+                1,
+                "C progression",
+                "Unknown Artist",
+                context.get()?.resources!!.getString(R.string.media_url_mp4),
+                null,
+                null
+            )
+            val trackDASH2 = Track(
+                1,
+                "Do re mi",
+                "Unknown Artist",
+                context.get()?.resources!!.getString(R.string.media_url_dash),
+                null,
+                null
+            )
 
-            return arrayListOf(trackMP4,trackDASH,trackMP41,trackDASH2)
+            return arrayListOf(trackMP4, trackDASH, trackMP41, trackDASH2)
         }
 
-        private fun getLocalVideo():ArrayList<Track> {
-            val trackList:ArrayList<Track> = ArrayList()
+        private fun getLocalVideo(): ArrayList<Track> {
+            val trackList: ArrayList<Track> = ArrayList()
 
             val videoResolver = context.get()?.contentResolver
             val videoUri = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -184,7 +242,8 @@ class TracksFragment : Fragment() {
                 //get columns
                 val titleColumn =
                     videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE)
-                val idColumn = videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID)
+                val idColumn =
+                    videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID)
                 val artistColumn =
                     videoCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ARTIST)
                 val dataColumn =
@@ -202,8 +261,8 @@ class TracksFragment : Fragment() {
             return trackList
         }
 
-        private fun getLocalAudio():ArrayList<Track> {
-            val trackList:ArrayList<Track> = ArrayList()
+        private fun getLocalAudio(): ArrayList<Track> {
+            val trackList: ArrayList<Track> = ArrayList()
 
             val musicResolver = context.get()?.contentResolver
             val musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
@@ -212,37 +271,40 @@ class TracksFragment : Fragment() {
 
             if (musicCursor != null && musicCursor.moveToFirst()) {
                 //get columns
-                val titleColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE)
-                val idColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID)
-                val artistColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ARTIST)
-                val dataColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.DATA)
-                val albumColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ALBUM)
+                val titleColumn =
+                    musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE)
+                val idColumn =
+                    musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID)
+                val artistColumn =
+                    musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ARTIST)
+                val dataColumn =
+                    musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.DATA)
+                val albumColumn =
+                    musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ALBUM)
                 //add songs to list
                 do {
                     val thisId = musicCursor.getLong(idColumn)
                     val thisTitle = musicCursor.getString(titleColumn)
                     val thisArtist = musicCursor.getString(artistColumn)
-                    val thisPath=musicCursor.getString(dataColumn)
+                    val thisPath = musicCursor.getString(dataColumn)
 
-                    var mediaDataRetriever= MediaMetadataRetriever()
+                    var mediaDataRetriever = MediaMetadataRetriever()
 
-                    mediaDataRetriever.setDataSource(context.get(),Uri.parse(thisPath))
+                    mediaDataRetriever.setDataSource(context.get(), Uri.parse(thisPath))
 
-                    var songImage:Bitmap?=null
+                    var songImage: Bitmap? = null
                     mediaDataRetriever.embeddedPicture?.let {
 
-                        val albumArt:ByteArray=mediaDataRetriever.embeddedPicture
+                        val albumArt: ByteArray = mediaDataRetriever.embeddedPicture
                         songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
                     }
-                    trackList.add(Track(thisId, thisTitle, thisArtist,thisPath,null,null))
+                    trackList.add(Track(thisId, thisTitle, thisArtist, thisPath, null, null))
                 } while (musicCursor.moveToNext())
             }
 
             return trackList
         }
     }
-
-
 
 
 }

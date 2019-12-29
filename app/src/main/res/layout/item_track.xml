@@ -22,6 +22,7 @@
         android:layout_height="wrap_content"
         android:textStyle="bold" />
     <ImageButton
+        android:visibility="gone"
         android:layout_centerVertical="true"
         android:id="@+id/more"
         android:src="@drawable/ic_add_black_24dp"
