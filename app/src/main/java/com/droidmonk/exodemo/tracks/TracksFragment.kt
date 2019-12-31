@@ -133,23 +133,16 @@ class TracksFragment : Fragment() {
         adapter.setOnClickListener(object : TracksAdapter.OnClickListener{
             override fun onClickAddToPlaylist(track: Track) {
 
-                mediaController.transportControls.playFromUri(Uri.parse(track.path),Bundle().apply { putBoolean("playlist",true) })
                }
 
             override fun onClick(track: Track) {
 
-
-                val uri= Uri.parse(track.path)
-
                 if(isAudio(getMimeType(track.path)))
                 {
-
                     activity?.let {startActivity( AudioPlayerActivity.getCallingIntent(it,track))}
-
                 }
                 else
                 {
-
                     startActivity(Intent(activity, VideoPlayerActivity::class.java).putExtra("track",track))
                 }
             }
@@ -312,7 +305,7 @@ class TracksFragment : Fragment() {
 
     fun getMimeType(url: String): String? {
         var type: String? = null
-        val extension = MimeTypeMap.getFileExtensionFromUrl(url)
+        val extension = MimeTypeMap.getFileExtensionFromUrl(Uri.encode(url))
         if (extension != null) {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
         }

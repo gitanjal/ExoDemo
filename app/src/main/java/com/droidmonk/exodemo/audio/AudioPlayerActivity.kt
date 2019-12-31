@@ -54,22 +54,11 @@ class AudioPlayerActivity : AppCompatActivity() {
         override fun onConnected() {
             super.onConnected()
             try {
-
                 mediaController = MediaControllerCompat(
-                    this@AudioPlayerActivity, // Context
+                    this@AudioPlayerActivity,
                     mMediaBrowserCompat.sessionToken
                 )
-
-//                MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
-                // MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
-                // Register a Callback to stay in sync
-                mediaController.registerCallback(mediaControllerCallback)
-
-                initialiseUIStates(mediaController.metadata,mediaController.playbackState)
-
                 buildTransportControls()
-
-
             } catch (e: RemoteException) {
                 Log.d("tag", "Remote exception")
             }
@@ -79,44 +68,26 @@ class AudioPlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_audio_player)
-
-        Log.d(TAG, "Inside onCreate")
-
         tbar = findViewById(R.id.app_bar)
-
         setSupportActionBar(tbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
 
         currentTrack = intent.getParcelableExtra(KEY_TRACK)
 
-        mMediaBrowserCompat = MediaBrowserCompat(
-            this, ComponentName(this, AudioService::class.java),
-            mediaBrowserConnectionCallback, null
-        )
-
-//        mMediaBrowserCompat.connect()
-
-        val track = intent.getParcelableExtra<Track>(KEY_TRACK)
-
-
+        mMediaBrowserCompat = MediaBrowserCompat(this, ComponentName(this, AudioService::class.java),
+            mediaBrowserConnectionCallback, null)
     }
-
 
     override fun onStart() {
         super.onStart()
-
         mMediaBrowserCompat.connect()
-
-        Log.d(TAG, "Inside onStart")
-
     }
 
     override fun onStop() {
-        super.onStop()
-
         mediaController.unregisterCallback(mediaControllerCallback)
         mMediaBrowserCompat.disconnect()
+        super.onStop()
     }
 
 
@@ -129,9 +100,6 @@ class AudioPlayerActivity : AppCompatActivity() {
 
         btn_play_pause.apply {
             setOnClickListener {
-                // Since this is a play/pause button, you'll need to test the current state
-                // and choose the action accordingly
-
                 val pbState = mediaController.playbackState.state
                 if (pbState == PlaybackStateCompat.STATE_PLAYING) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -155,7 +123,6 @@ class AudioPlayerActivity : AppCompatActivity() {
         btn_repeat.setOnClickListener {
             mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
         }
-
     }
 
     private var mediaControllerCallback = object : MediaControllerCompat.Callback() {
@@ -177,10 +144,7 @@ class AudioPlayerActivity : AppCompatActivity() {
         tbar.title = metadata.getString(METADATA_KEY_TITLE)
         tv_track_title.setText(metadata.getString(METADATA_KEY_TITLE))
 
-
         val mediaDataRetriever = MediaMetadataRetriever()
-
-
         val uriIcon = metadata.description?.iconUri
 
         if (uriIcon != null) {
