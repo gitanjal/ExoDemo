@@ -15,6 +15,7 @@ class TracksAdapter(val tracks:ArrayList<Track>) : RecyclerView.Adapter<TracksAd
     interface OnClickListener{
         fun onClick(track:Track)
         fun onClickAddToPlaylist(track:Track)
+        fun onClickDownload(track: Track)
     }
 
     private lateinit var listener:OnClickListener
@@ -48,9 +49,11 @@ class TracksAdapter(val tracks:ArrayList<Track>) : RecyclerView.Adapter<TracksAd
             listener.onClick(tracks[position])
         }
 
-        holder.itemView.more.setOnClickListener {
-            listener.onClickAddToPlaylist(tracks[position])
+        holder.itemView.download.setOnClickListener {
+            listener.onClickDownload(tracks[position])
         }
+
+
 
     }
 

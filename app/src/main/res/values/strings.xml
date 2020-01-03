@@ -11,4 +11,7 @@
     <string name="foreground_service_notification_channel_description">Notification for media playback</string>
     <string name="drawer_open">open drawer</string>
     <string name="drawer_close">close drawer</string>
+
+    <string name="download_service_notification_channel">ExoDemo download</string>
+
 </resources>

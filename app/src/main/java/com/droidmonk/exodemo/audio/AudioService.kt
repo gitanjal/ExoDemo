@@ -17,7 +17,9 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.text.method.TextKeyListener.clear
 import androidx.media.MediaBrowserServiceCompat
+import com.droidmonk.exodemo.App
 import com.droidmonk.exodemo.R
 import com.droidmonk.exodemo.tracks.Track
 import com.google.android.exoplayer2.*
@@ -30,6 +32,7 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 
 
 class AudioService : MediaBrowserServiceCompat() {
@@ -41,7 +44,7 @@ class AudioService : MediaBrowserServiceCompat() {
 
     private var playerNotificationManager: PlayerNotificationManager? = null
     private var player: SimpleExoPlayer? = null
-    private lateinit var concatenatedSource: ConcatenatingMediaSource
+    private var concatenatedSource: ConcatenatingMediaSource= ConcatenatingMediaSource()
 
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
@@ -49,6 +52,7 @@ class AudioService : MediaBrowserServiceCompat() {
     private lateinit var stateBuilder: PlaybackStateCompat.Builder
 
     private var currentTrack:Track? = null
+    private val playlist= ArrayList<Track>()
 
     override fun onCreate() {
         super.onCreate()
@@ -67,11 +71,11 @@ class AudioService : MediaBrowserServiceCompat() {
                 }
 
                 override fun getCurrentContentText(player: Player?): String? {
-                    return currentTrack?.trackArtist
+                    return playlist[player!!.currentWindowIndex].trackArtist
                 }
 
                 override fun getCurrentContentTitle(player: Player?): String {
-                    return currentTrack?.trackTitle?:"Unknown"
+                    return playlist[player!!.currentWindowIndex].trackTitle?:"Unknown"
                 }
 
                 override fun getCurrentLargeIcon(
@@ -79,16 +83,24 @@ class AudioService : MediaBrowserServiceCompat() {
                     callback: PlayerNotificationManager.BitmapCallback?
                 ): Bitmap? {
 
-                    var mediaDataRetriever= MediaMetadataRetriever()
-                    mediaDataRetriever.setDataSource(this@AudioService,Uri.parse(currentTrack?.path))
+                    try {
+                        var mediaDataRetriever = MediaMetadataRetriever()
+                        mediaDataRetriever.setDataSource(
+                            this@AudioService,
+                            Uri.parse(playlist[player!!.currentWindowIndex].path)
+                        )
 
-                    var songImage: Bitmap?=null
-                    mediaDataRetriever.embeddedPicture?.let {
+                        var songImage: Bitmap? = null
+                        mediaDataRetriever.embeddedPicture?.let {
 
-                        val albumArt:ByteArray=mediaDataRetriever.embeddedPicture
-                        songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
+                            val albumArt: ByteArray = mediaDataRetriever.embeddedPicture
+                            songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
+                        }
+                        return songImage
+                    }catch (e:Exception)
+                    {
+                        return null
                     }
-                    return songImage
                 }
             },
             object : PlayerNotificationManager.NotificationListener{
@@ -132,8 +144,8 @@ class AudioService : MediaBrowserServiceCompat() {
                 windowIndex: Int
             ): MediaDescriptionCompat {
                 return MediaDescriptionCompat.Builder()
-                    .setTitle(currentTrack?.trackTitle)
-                    .setIconUri(Uri.parse(currentTrack?.path))
+                    .setTitle(playlist[windowIndex].trackTitle)
+                    .setIconUri(playlist[windowIndex].iconUri)
                     .build()
             }
         })
@@ -176,19 +188,49 @@ class AudioService : MediaBrowserServiceCompat() {
             override fun onPrepareFromUri(uri: Uri?, playWhenReady: Boolean, extras: Bundle?) {
 
                 val trackToPlay:Track?=extras?.getParcelable("track")
-                if(trackToPlay!=null && !trackToPlay?.path.equals(currentTrack?.path)) {
-                    currentTrack = extras?.getParcelable("track")
-
-                    val dataSourceFactory: DefaultDataSourceFactory =
-                        DefaultDataSourceFactory(this@AudioService, "Media Player")
-                    val mediaSource: ProgressiveMediaSource =
-                        ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(
-                            uri
-                        )
+                val addToPlayList= extras?.getBoolean("playlist")?:false
 
 
-                    player?.prepare(mediaSource)
-                    player?.setPlayWhenReady(true)
+                val dataSourceFactory: DefaultDataSourceFactory =
+                    DefaultDataSourceFactory(this@AudioService, "Media Player")
+
+                val cachedDataSourceFactory:CacheDataSourceFactory =CacheDataSourceFactory(
+                    (application as App).appContainer.downloadCache, dataSourceFactory);
+
+                val mediaSource: ProgressiveMediaSource =
+                    ProgressiveMediaSource.Factory(cachedDataSourceFactory).createMediaSource(
+                        uri
+                    )
+
+                if(addToPlayList)
+                {
+                    trackToPlay?.let { playlist.add(it) }
+
+                    //add to playlist
+                    concatenatedSource.addMediaSource(mediaSource)
+
+                    //check if it has only one item
+                    if(concatenatedSource.size==1)
+                    {
+
+                        player?.prepare(concatenatedSource)
+                        player?.setPlayWhenReady(true)
+                    }
+                }
+                else {
+                    //clear our playlist
+                    playlist.clear()
+                    trackToPlay?.let { playlist.add(it) }
+
+                    //start playback immediately
+                    if (trackToPlay != null && !trackToPlay?.path.equals(currentTrack?.path)) {
+                        currentTrack = extras?.getParcelable("track")
+
+                        concatenatedSource = ConcatenatingMediaSource(mediaSource)
+
+                        player?.prepare(concatenatedSource)
+                        player?.setPlayWhenReady(true)
+                    }
                 }
             }
 

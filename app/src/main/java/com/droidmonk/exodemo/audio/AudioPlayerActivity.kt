@@ -153,7 +153,49 @@ class AudioPlayerActivity : AppCompatActivity() {
         }
 
         btn_repeat.setOnClickListener {
-            mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
+            if(mediaController.repeatMode.equals(PlaybackStateCompat.REPEAT_MODE_NONE)) {
+                mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat_on, theme)
+                } else {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat_on)
+                }
+            }
+            else {
+                mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_NONE)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat, theme)
+                } else {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat)
+                }
+            }
+        }
+
+        btn_next.setOnClickListener{
+            mediaController.transportControls.skipToNext()
+        }
+
+        btn_prev.setOnClickListener{
+            mediaController.transportControls.skipToPrevious()
+        }
+
+        btn_shuffle.setOnClickListener {
+            if(mediaController.shuffleMode.equals(PlaybackStateCompat.SHUFFLE_MODE_NONE)) {
+                mediaController.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    btn_shuffle.background = resources.getDrawable(R.drawable.ic_shuffle_on, theme)
+                } else {
+                    btn_shuffle.background = resources.getDrawable(R.drawable.ic_shuffle_on)
+                }
+            }
+            else {
+                mediaController.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    btn_shuffle.background = resources.getDrawable(R.drawable.ic_shuffle, theme)
+                } else {
+                    btn_shuffle.background = resources.getDrawable(R.drawable.ic_shuffle)
+                }
+            }
         }
 
     }
@@ -177,9 +219,7 @@ class AudioPlayerActivity : AppCompatActivity() {
         tbar.title = metadata.getString(METADATA_KEY_TITLE)
         tv_track_title.setText(metadata.getString(METADATA_KEY_TITLE))
 
-
         val mediaDataRetriever = MediaMetadataRetriever()
-
 
         val uriIcon = metadata.description?.iconUri
 
@@ -188,21 +228,25 @@ class AudioPlayerActivity : AppCompatActivity() {
 
             var songImage: Bitmap? = null
             mediaDataRetriever.embeddedPicture?.let {
-
                 val albumArt: ByteArray = mediaDataRetriever.embeddedPicture
                 songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
+                img_album_art.setImageBitmap(songImage)
             }
-            img_album_art.setImageBitmap(songImage)
         }
     }
 
     fun updateUIStates(state: PlaybackStateCompat) {
         if (state?.state == PlaybackStateCompat.STATE_PLAYING) {
-            btn_play_pause.background = resources.getDrawable(R.drawable.ic_pause)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                btn_play_pause.background = resources.getDrawable(R.drawable.ic_pause,theme)
+            else
+                btn_play_pause.background = resources.getDrawable(R.drawable.ic_pause)
         } else {
-            btn_play_pause.background = resources.getDrawable(R.drawable.ic_play)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                btn_play_pause.background = resources.getDrawable(R.drawable.ic_play,theme)
+            else
+                btn_play_pause.background = resources.getDrawable(R.drawable.ic_play)
         }
-
     }
 
     fun initialiseUIStates(metadata: MediaMetadataCompat?, state: PlaybackStateCompat?) {

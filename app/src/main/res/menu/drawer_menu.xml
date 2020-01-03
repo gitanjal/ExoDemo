@@ -11,4 +11,7 @@
 
     <item android:title="Web Audio"
         android:id="@+id/menu_web_audio"/>
+
+    <item android:title="Downloads"
+        android:id="@+id/menu_download"/>
 </menu>
