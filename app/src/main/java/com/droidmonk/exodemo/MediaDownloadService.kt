@@ -40,10 +40,7 @@ class MediaDownloadService() : DownloadService(FOREGROUND_NOTIFICATION_ID,
     }
 
     override fun getScheduler(): Scheduler? {
-        return if (Util.SDK_INT >= 21) PlatformScheduler(
-            this,
-            1
-        ) else null
+        return null
     }
 
 
