@@ -192,7 +192,7 @@ class AudioService : MediaBrowserServiceCompat() {
 
 
                 val dataSourceFactory: DefaultDataSourceFactory =
-                    DefaultDataSourceFactory(this@AudioService, "Media Player")
+                    DefaultDataSourceFactory(this@AudioService, "ExoDemo")
 
                 val cachedDataSourceFactory:CacheDataSourceFactory =CacheDataSourceFactory(
                     (application as App).appContainer.downloadCache, dataSourceFactory);

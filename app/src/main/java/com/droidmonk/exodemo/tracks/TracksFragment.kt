@@ -12,9 +12,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.RemoteException
 import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -30,13 +28,20 @@ import com.droidmonk.exodemo.R
 import com.droidmonk.exodemo.VideoPlayerActivity
 import com.droidmonk.exodemo.audio.AudioPlayerActivity
 import com.droidmonk.exodemo.audio.AudioService
+import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.DefaultRenderersFactory
+import com.google.android.exoplayer2.RenderersFactory
 import com.google.android.exoplayer2.offline.DownloadCursor
+import com.google.android.exoplayer2.offline.DownloadHelper
 import com.google.android.exoplayer2.offline.DownloadRequest
 import com.google.android.exoplayer2.offline.DownloadService
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.MimeTypes.isAudio
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.fragment_tracks.*
-import kotlinx.android.synthetic.main.item_track.*
+import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -67,8 +72,6 @@ class TracksFragment : Fragment() {
 
 
     var trackType:Int=TYPE_AUDIO_LOCAL   //default
-    private lateinit var mService: AudioService
-    private var mBound: Boolean = false
 
     private lateinit var mMediaBrowserCompat: MediaBrowserCompat
     private lateinit var mediaController: MediaControllerCompat
@@ -143,16 +146,30 @@ class TracksFragment : Fragment() {
 
             override fun onClickDownload(track: Track) {
 
+                val downloadHelper=getDownloadHelper(Uri.parse(track.path),track.extension!!)
+                downloadHelper?.prepare(object : DownloadHelper.Callback{
+                    override fun onPrepared(helper: DownloadHelper?) {
 
-                var downloadRequest= DownloadRequest(
+                        val downloadRequest=helper?.getDownloadRequest(Util.getUtf8Bytes(track.trackTitle))
+                        DownloadService.sendAddDownload(activity,MediaDownloadService::class.java,downloadRequest,true)
+
+
+                    }
+
+                    override fun onPrepareError(helper: DownloadHelper?, e: IOException?) {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    }
+                });
+
+
+                /*var downloadRequest= DownloadRequest(
                     track.path,
                     DownloadRequest.TYPE_PROGRESSIVE,
                     Uri.parse(track.path),
-                    /* streamKeys= */ Collections.emptyList(),
-                    /* customCacheKey= */ null,
+                    *//* streamKeys= *//* Collections.emptyList(),
+                    *//* customCacheKey= *//* null,
                     Util.getUtf8Bytes(track.trackTitle));
-
-                DownloadService.sendAddDownload(activity,MediaDownloadService::class.java,downloadRequest,true)
+*/
 
             }
 
@@ -207,7 +224,7 @@ class TracksFragment : Fragment() {
             "Simple MP4",
             "Artist 1",
             resources.getString(R.string.media_url_mp4),
-            null,
+            "mp4",
             null,
             null
         )
@@ -392,43 +409,20 @@ class TracksFragment : Fragment() {
         return type
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-
-      /*  if(mBound) {
-            activity?.unbindService(connection)
-            mBound = false
-        }*/
-    }
-
-/*
-    fun buildTransportControls() {
-        btn_play.apply {
-            setOnClickListener {
-                // Since this is a play/pause button, you'll need to test the current state
-                // and choose the action accordingly
-
-                val pbState = mediaController.playbackState.state
-                if (pbState == PlaybackStateCompat.STATE_PLAYING) {
-                    btn_play.background=resources.getDrawable(R.drawable.ic_pause)
-                    mediaController.transportControls.pause()
-                } else {
-                    btn_play.background=resources.getDrawable(R.drawable.ic_play)
-                    mediaController.transportControls.play()
-                }
-            }
+    private fun getDownloadHelper(
+        uri: Uri, extension: String
+    ): DownloadHelper? {
+        val type = Util.inferContentType(uri, extension)
+        val dataSourceFactory = DefaultDataSourceFactory(activity, DefaultHttpDataSourceFactory("ExoDemo"));
+        val renderersFactory: RenderersFactory=DefaultRenderersFactory(activity)
+        return when (type) {
+            C.TYPE_DASH -> DownloadHelper.forDash(
+                uri,
+                dataSourceFactory,
+                renderersFactory
+            )
+            C.TYPE_OTHER -> DownloadHelper.forProgressive(uri)
+            else -> throw IllegalStateException("Unsupported type: $type")
         }
-
-        // Register a Callback to stay in sync
-        mediaController.registerCallback(controllerCallback)
     }
-*/
-
-    private var controllerCallback = object : MediaControllerCompat.Callback() {
-
-        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {}
-
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {}
-    }
-
 }
