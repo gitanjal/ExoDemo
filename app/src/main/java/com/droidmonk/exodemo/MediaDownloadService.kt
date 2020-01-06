@@ -36,7 +36,7 @@ class MediaDownloadService() : DownloadService(FOREGROUND_NOTIFICATION_ID,
     }
 
     override fun getForegroundNotification(downloads: MutableList<Download>?): Notification {
-        return notificationHelper.buildProgressNotification(R.drawable.ic_file_download_black_24dp,null,null,downloads)
+        return notificationHelper.buildProgressNotification(R.drawable.ic_file_download_black_24dp,null,"Downloading media..",downloads)
     }
 
     override fun getScheduler(): Scheduler? {

@@ -123,7 +123,7 @@ class AudioService : MediaBrowserServiceCompat() {
 
             )
 
-            // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
+            // SetD an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
             stateBuilder = PlaybackStateCompat.Builder()
                 .setActions(PlaybackStateCompat.ACTION_PLAY
                         or PlaybackStateCompat.ACTION_PLAY_PAUSE
@@ -191,10 +191,10 @@ class AudioService : MediaBrowserServiceCompat() {
                 val addToPlayList= extras?.getBoolean("playlist")?:false
 
 
-                val dataSourceFactory: DefaultDataSourceFactory =
+                val dataSourceFactory =
                     DefaultDataSourceFactory(this@AudioService, "Media Player")
 
-                val cachedDataSourceFactory:CacheDataSourceFactory =CacheDataSourceFactory(
+                val cachedDataSourceFactory =CacheDataSourceFactory(
                     (application as App).appContainer.downloadCache, dataSourceFactory);
 
                 val mediaSource: ProgressiveMediaSource =
