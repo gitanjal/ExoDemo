@@ -312,43 +312,5 @@ class TracksFragment : Fragment() {
         return type
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-
-      /*  if(mBound) {
-            activity?.unbindService(connection)
-            mBound = false
-        }*/
-    }
-
-/*
-    fun buildTransportControls() {
-        btn_play.apply {
-            setOnClickListener {
-                // Since this is a play/pause button, you'll need to test the current state
-                // and choose the action accordingly
-
-                val pbState = mediaController.playbackState.state
-                if (pbState == PlaybackStateCompat.STATE_PLAYING) {
-                    btn_play.background=resources.getDrawable(R.drawable.ic_pause)
-                    mediaController.transportControls.pause()
-                } else {
-                    btn_play.background=resources.getDrawable(R.drawable.ic_play)
-                    mediaController.transportControls.play()
-                }
-            }
-        }
-
-        // Register a Callback to stay in sync
-        mediaController.registerCallback(controllerCallback)
-    }
-*/
-
-    private var controllerCallback = object : MediaControllerCompat.Callback() {
-
-        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {}
-
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {}
-    }
 
 }

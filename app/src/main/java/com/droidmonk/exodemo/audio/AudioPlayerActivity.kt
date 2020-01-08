@@ -92,7 +92,6 @@ class AudioPlayerActivity : AppCompatActivity() {
 
 
     fun buildTransportControls() {
-
         if (currentTrack != null)
             mediaController.transportControls.playFromUri(
                 Uri.parse(currentTrack?.path),
