@@ -46,83 +46,15 @@ class AudioService : MediaBrowserServiceCompat() {
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
 
-    private lateinit var stateBuilder: PlaybackStateCompat.Builder
-
     private var currentTrack:Track? = null
 
     override fun onCreate() {
         super.onCreate()
 
         player = ExoPlayerFactory.newSimpleInstance(this, DefaultTrackSelector())
-        playerNotificationManager= PlayerNotificationManager.createWithNotificationChannel(
-            applicationContext,
-            PLAYBACK_CHANNEL_ID,
-            R.string.foreground_service_notification_channel,
-            R.string.foreground_service_notification_channel_description,
-            PLAYBACK_NOTIFICATION_ID,
-            object:PlayerNotificationManager.MediaDescriptionAdapter{
-                override fun createCurrentContentIntent(player: Player?): PendingIntent? {
-                    var intent=AudioPlayerActivity.getCallingIntent(this@AudioService,null)
-                    return PendingIntent.getActivity(this@AudioService,0,intent,PendingIntent.FLAG_UPDATE_CURRENT)
-                }
-
-                override fun getCurrentContentText(player: Player?): String? {
-                    return currentTrack?.trackArtist
-                }
-
-                override fun getCurrentContentTitle(player: Player?): String {
-                    return currentTrack?.trackTitle?:"Unknown"
-                }
-
-                override fun getCurrentLargeIcon(
-                    player: Player?,
-                    callback: PlayerNotificationManager.BitmapCallback?
-                ): Bitmap? {
-
-                    var mediaDataRetriever= MediaMetadataRetriever()
-                    mediaDataRetriever.setDataSource(this@AudioService,Uri.parse(currentTrack?.path))
-
-                    var songImage: Bitmap?=null
-                    mediaDataRetriever.embeddedPicture?.let {
-
-                        val albumArt:ByteArray=mediaDataRetriever.embeddedPicture
-                        songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
-                    }
-                    return songImage
-                }
-            },
-            object : PlayerNotificationManager.NotificationListener{
-                override fun onNotificationCancelled(notificationId: Int) {
-                    stopSelf()
-                }
-
-                override fun onNotificationStarted(notificationId: Int, notification: Notification?) {
-                    startForeground(notificationId,notification)
-                }
-            }
-        )
-
-        playerNotificationManager?.setPlayer(player)
-
-        mediaSession = MediaSessionCompat(baseContext, LOG_TAG)/*.apply {
-
-            // Enable callbacks from MediaButtons and TransportControls
-     *//*       setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-
-            )
-
-            // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
-            stateBuilder = PlaybackStateCompat.Builder()
-                .setActions(PlaybackStateCompat.ACTION_PLAY
-                        or PlaybackStateCompat.ACTION_PLAY_PAUSE
-                )
-            setPlaybackState(stateBuilder.build())*//*
-
-            // Set the session's token so that client activities can communicate with it.
-            setSessionToken(sessionToken)
-        }
-*/
+        mediaSession = MediaSessionCompat(baseContext, LOG_TAG)
         sessionToken=mediaSession.sessionToken
+        mediaSession.isActive=true
 
         playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
         mediaSessionConnector= MediaSessionConnector(mediaSession)
@@ -135,12 +67,11 @@ class AudioService : MediaBrowserServiceCompat() {
                     .setTitle(currentTrack?.trackTitle)
                     .setIconUri(Uri.parse(currentTrack?.path))
                     .build()
-            }
+           }
         })
 
-        mediaSession.isActive=true
         mediaSessionConnector.setPlayer(player)
-        mediaSessionConnector.setPlaybackPreparer(object: MediaSessionConnector.PlaybackPreparer{
+        mediaSessionConnector.setPlaybackPreparer(object: PlaybackPreparer{
             override fun onPrepareFromSearch(
                 query: String?,
                 playWhenReady: Boolean,
@@ -157,8 +88,6 @@ class AudioService : MediaBrowserServiceCompat() {
                 cb: ResultReceiver?
             ): Boolean {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-
-
             }
 
             override fun getSupportedPrepareActions(): Long {

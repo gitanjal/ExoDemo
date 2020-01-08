@@ -60,8 +60,6 @@ class AudioPlayerActivity : AppCompatActivity() {
                     mMediaBrowserCompat.sessionToken
                 )
 
-//                MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
-                // MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
                 // Register a Callback to stay in sync
                 mediaController.registerCallback(mediaControllerCallback)
 
@@ -108,15 +106,13 @@ class AudioPlayerActivity : AppCompatActivity() {
 
         mMediaBrowserCompat.connect()
 
-        Log.d(TAG, "Inside onStart")
-
     }
 
     override fun onStop() {
-        super.onStop()
-
         mediaController.unregisterCallback(mediaControllerCallback)
         mMediaBrowserCompat.disconnect()
+
+        super.onStop()
     }
 
 
@@ -159,30 +155,21 @@ class AudioPlayerActivity : AppCompatActivity() {
     }
 
     private var mediaControllerCallback = object : MediaControllerCompat.Callback() {
-
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-
             metadata?.apply { updateMetaData(metadata) }
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-
             state?.apply { updateUIStates(state) }
-
         }
     }
-
 
     fun updateMetaData(metadata: MediaMetadataCompat) {
         tbar.title = metadata.getString(METADATA_KEY_TITLE)
         tv_track_title.setText(metadata.getString(METADATA_KEY_TITLE))
 
-
         val mediaDataRetriever = MediaMetadataRetriever()
-
-
         val uriIcon = metadata.description?.iconUri
-
         if (uriIcon != null) {
             mediaDataRetriever.setDataSource(this@AudioPlayerActivity, uriIcon)
 
@@ -198,11 +185,21 @@ class AudioPlayerActivity : AppCompatActivity() {
 
     fun updateUIStates(state: PlaybackStateCompat) {
         if (state?.state == PlaybackStateCompat.STATE_PLAYING) {
-            btn_play_pause.background = resources.getDrawable(R.drawable.ic_pause)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                btn_play_pause.background = resources.getDrawable(R.drawable.ic_pause,theme)
+            }
+            else{
+                btn_play_pause.background = resources.getDrawable(R.drawable.ic_pause)
+            }
         } else {
-            btn_play_pause.background = resources.getDrawable(R.drawable.ic_play)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                btn_play_pause.background = resources.getDrawable(R.drawable.ic_play,theme)
+            }
+            else
+            {
+                btn_play_pause.background = resources.getDrawable(R.drawable.ic_play)
+            }
         }
-
     }
 
     fun initialiseUIStates(metadata: MediaMetadataCompat?, state: PlaybackStateCompat?) {
