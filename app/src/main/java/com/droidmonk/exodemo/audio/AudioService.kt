@@ -116,25 +116,9 @@ class AudioService : MediaBrowserServiceCompat() {
 
         playerNotificationManager?.setPlayer(player)
 
-        mediaSession = MediaSessionCompat(baseContext, LOG_TAG)/*.apply {
-
-            // Enable callbacks from MediaButtons and TransportControls
-     *//*       setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-
-            )
-
-            // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
-            stateBuilder = PlaybackStateCompat.Builder()
-                .setActions(PlaybackStateCompat.ACTION_PLAY
-                        or PlaybackStateCompat.ACTION_PLAY_PAUSE
-                )
-            setPlaybackState(stateBuilder.build())*//*
-
-            // Set the session's token so that client activities can communicate with it.
-            setSessionToken(sessionToken)
-        }
-*/
+        mediaSession = MediaSessionCompat(baseContext, LOG_TAG)
         sessionToken=mediaSession.sessionToken
+        mediaSession.isActive=true
 
         playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
         mediaSessionConnector= MediaSessionConnector(mediaSession)
@@ -150,7 +134,7 @@ class AudioService : MediaBrowserServiceCompat() {
             }
         })
 
-        mediaSession.isActive=true
+
         mediaSessionConnector.setPlayer(player)
         mediaSessionConnector.setPlaybackPreparer(object: MediaSessionConnector.PlaybackPreparer{
             override fun onPrepareFromSearch(
@@ -191,16 +175,18 @@ class AudioService : MediaBrowserServiceCompat() {
                 val addToPlayList= extras?.getBoolean("playlist")?:false
 
 
-                val dataSourceFactory: DefaultDataSourceFactory =
+                val dataSourceFactory =
                     DefaultDataSourceFactory(this@AudioService, "ExoDemo")
 
-                val cachedDataSourceFactory:CacheDataSourceFactory =CacheDataSourceFactory(
+                val cachedDataSourceFactory =CacheDataSourceFactory(
                     (application as App).appContainer.downloadCache, dataSourceFactory);
 
                 val mediaSource: ProgressiveMediaSource =
                     ProgressiveMediaSource.Factory(cachedDataSourceFactory).createMediaSource(
                         uri
                     )
+
+
 
                 if(addToPlayList)
                 {

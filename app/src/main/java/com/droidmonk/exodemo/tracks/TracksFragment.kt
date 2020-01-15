@@ -41,6 +41,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.MimeTypes.isAudio
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.fragment_tracks.*
+import org.json.JSONObject
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
@@ -150,14 +151,20 @@ class TracksFragment : Fragment() {
                 downloadHelper?.prepare(object : DownloadHelper.Callback{
                     override fun onPrepared(helper: DownloadHelper?) {
 
-                        val downloadRequest=helper?.getDownloadRequest(Util.getUtf8Bytes(track.trackTitle))
+                        val jsonObject=JSONObject()
+                        jsonObject.put("title",track.trackTitle)
+                        jsonObject.put("extension",track.extension)
+
+                        var str=jsonObject.toString();
+
+                        val downloadRequest=helper?.getDownloadRequest(Util.getUtf8Bytes(jsonObject.toString()))
                         DownloadService.sendAddDownload(activity,MediaDownloadService::class.java,downloadRequest,true)
 
 
                     }
 
                     override fun onPrepareError(helper: DownloadHelper?, e: IOException?) {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                        e?.printStackTrace()
                     }
                 });
 
@@ -207,11 +214,14 @@ class TracksFragment : Fragment() {
         val downloadCursor:DownloadCursor=(activity?.application as App).appContainer.downloadManager.downloadIndex.getDownloads()
         if (downloadCursor.moveToFirst()) {
 
-            val title = Util.fromUtf8Bytes(downloadCursor.download.request.data)
+            do{
+            val jsonString = Util.fromUtf8Bytes(downloadCursor.download.request.data)
+            val jsonObject=JSONObject(jsonString)
             val uri=downloadCursor.download.request.uri
 
-            downloadedTracks.add(Track(title,null,uri.toString(),null,null,null))
+            downloadedTracks.add(Track(jsonObject.getString("title"),null,uri.toString(),jsonObject.getString("extension"),null,null))
 
+            }while (downloadCursor.moveToNext())
             Log.d("TracksFragment","Hello world")
         }
         return downloadedTracks
@@ -246,7 +256,7 @@ class TracksFragment : Fragment() {
             "Guitar solo",
             "Unknown Artist",
             "https://storage.googleapis.com/automotive-media/Jazz_In_Paris.mp3",
-            null,
+            "mp3",
             null,
             null
         )
@@ -254,23 +264,23 @@ class TracksFragment : Fragment() {
             "Guitar fingerstyle",
             "Unknown Artist",
             "https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
-            null,
+            "mp3",
             null,
             null
         )
         var trackMP41=Track(
             "C progression",
             "Unknown Artist",
-            resources.getString(R.string.media_url_mp4),
-            null,
+            "https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
+            "mp3",
             null,
             null
         )
         var trackDASH2=Track(
             "Do re mi",
             "Unknown Artist",
-            resources.getString(R.string.media_url_dash),
-            null,
+            "https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
+            "mp3",
             null,
             null
         )
