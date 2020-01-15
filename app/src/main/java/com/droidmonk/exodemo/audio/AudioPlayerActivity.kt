@@ -75,8 +75,10 @@ class AudioPlayerActivity : AppCompatActivity() {
 
         currentTrack = intent.getParcelableExtra(KEY_TRACK)
 
-        mMediaBrowserCompat = MediaBrowserCompat(this, ComponentName(this, AudioService::class.java),
-            mediaBrowserConnectionCallback, null)
+        mMediaBrowserCompat = MediaBrowserCompat(
+            this, ComponentName(this, AudioService::class.java),
+            mediaBrowserConnectionCallback, null
+        )
     }
 
     override fun onStart() {
@@ -120,7 +122,21 @@ class AudioPlayerActivity : AppCompatActivity() {
         }
 
         btn_repeat.setOnClickListener {
-            mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
+            if (mediaController.repeatMode.equals(PlaybackStateCompat.REPEAT_MODE_ALL)) {
+                mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_NONE)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat, theme)
+                } else {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat)
+                }
+            } else {
+                mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat_on, theme)
+                } else {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat_on)
+                }
+            }
         }
     }
 
