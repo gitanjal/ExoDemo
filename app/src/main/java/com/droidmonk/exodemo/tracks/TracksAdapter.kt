@@ -53,7 +53,9 @@ class TracksAdapter(val tracks:ArrayList<Track>) : RecyclerView.Adapter<TracksAd
             listener.onClickDownload(tracks[position])
         }
 
-
+        holder.itemView.more.setOnClickListener {
+            listener.onClickAddToPlaylist(tracks[position])
+        }
 
     }
 
