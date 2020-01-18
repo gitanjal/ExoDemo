@@ -60,9 +60,6 @@ class AudioPlayerActivity : AppCompatActivity() {
                     mMediaBrowserCompat.sessionToken
                 )
 
-//                MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
-                // MediaControllerCompat.setMediaController(this@AudioPlayerActivity, mediaController)
-                // Register a Callback to stay in sync
                 mediaController.registerCallback(mediaControllerCallback)
 
                 initialiseUIStates(mediaController.metadata,mediaController.playbackState)

@@ -39,7 +39,7 @@ class AudioService : MediaBrowserServiceCompat() {
     val PLAYBACK_CHANNEL_ID = "audio_channel"
     val PLAYBACK_NOTIFICATION_ID = 1
 
-    private var playerNotificationManager: PlayerNotificationManager? = null
+    private lateinit var playerNotificationManager: PlayerNotificationManager
     private var player: SimpleExoPlayer? = null
     private lateinit var concatenatedSource: ConcatenatingMediaSource
 
@@ -105,6 +105,7 @@ class AudioService : MediaBrowserServiceCompat() {
         sessionToken=mediaSession.sessionToken
 
         playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
+
         mediaSessionConnector= MediaSessionConnector(mediaSession)
         mediaSessionConnector.setQueueNavigator(object : TimelineQueueNavigator(mediaSession ){
             override fun getMediaDescription(
