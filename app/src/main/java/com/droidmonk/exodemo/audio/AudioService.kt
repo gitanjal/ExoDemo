@@ -17,7 +17,9 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.text.method.TextKeyListener.clear
 import androidx.media.MediaBrowserServiceCompat
+import com.droidmonk.exodemo.App
 import com.droidmonk.exodemo.R
 import com.droidmonk.exodemo.tracks.Track
 import com.google.android.exoplayer2.*
@@ -42,11 +44,12 @@ class AudioService : MediaBrowserServiceCompat() {
 
     private var playerNotificationManager: PlayerNotificationManager? = null
     private var player: SimpleExoPlayer? = null
-    private lateinit var concatenatedSource: ConcatenatingMediaSource
+    private var concatenatedSource: ConcatenatingMediaSource= ConcatenatingMediaSource()
 
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
 
+    private lateinit var stateBuilder: PlaybackStateCompat.Builder
 
     private var currentTrack:Track? = null
     private val playlist= ArrayList<Track>()
@@ -68,11 +71,11 @@ class AudioService : MediaBrowserServiceCompat() {
                 }
 
                 override fun getCurrentContentText(player: Player?): String? {
-                    return currentTrack?.trackArtist
+                    return playlist[player!!.currentWindowIndex].trackArtist
                 }
 
                 override fun getCurrentContentTitle(player: Player?): String {
-                    return currentTrack?.trackTitle?:"Unknown"
+                    return playlist[player!!.currentWindowIndex].trackTitle?:"Unknown"
                 }
 
                 override fun getCurrentLargeIcon(
@@ -80,16 +83,24 @@ class AudioService : MediaBrowserServiceCompat() {
                     callback: PlayerNotificationManager.BitmapCallback?
                 ): Bitmap? {
 
-                    var mediaDataRetriever= MediaMetadataRetriever()
-                    mediaDataRetriever.setDataSource(this@AudioService,Uri.parse(currentTrack?.path))
+                    try {
+                        var mediaDataRetriever = MediaMetadataRetriever()
+                        mediaDataRetriever.setDataSource(
+                            this@AudioService,
+                            Uri.parse(playlist[player!!.currentWindowIndex].path)
+                        )
 
-                    var songImage: Bitmap?=null
-                    mediaDataRetriever.embeddedPicture?.let {
+                        var songImage: Bitmap? = null
+                        mediaDataRetriever.embeddedPicture?.let {
 
-                        val albumArt:ByteArray=mediaDataRetriever.embeddedPicture
-                        songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
+                            val albumArt: ByteArray = mediaDataRetriever.embeddedPicture
+                            songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
+                        }
+                        return songImage
+                    }catch (e:Exception)
+                    {
+                        return null
                     }
-                    return songImage
                 }
             },
             object : PlayerNotificationManager.NotificationListener{
@@ -105,8 +116,24 @@ class AudioService : MediaBrowserServiceCompat() {
 
         playerNotificationManager?.setPlayer(player)
 
-        mediaSession = MediaSessionCompat(baseContext, LOG_TAG)
+        mediaSession = MediaSessionCompat(baseContext, LOG_TAG)/*.apply {
 
+            // Enable callbacks from MediaButtons and TransportControls
+     *//*       setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+
+            )
+
+            // SetD an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
+            stateBuilder = PlaybackStateCompat.Builder()
+                .setActions(PlaybackStateCompat.ACTION_PLAY
+                        or PlaybackStateCompat.ACTION_PLAY_PAUSE
+                )
+            setPlaybackState(stateBuilder.build())*//*
+
+            // Set the session's token so that client activities can communicate with it.
+            setSessionToken(sessionToken)
+        }
+*/
         sessionToken=mediaSession.sessionToken
 
         playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
@@ -117,8 +144,8 @@ class AudioService : MediaBrowserServiceCompat() {
                 windowIndex: Int
             ): MediaDescriptionCompat {
                 return MediaDescriptionCompat.Builder()
-                    .setTitle(currentTrack?.trackTitle)
-                    .setIconUri(Uri.parse(currentTrack?.path))
+                    .setTitle(playlist[windowIndex].trackTitle)
+                    .setIconUri(playlist[windowIndex].iconUri)
                     .build()
             }
         })
@@ -160,10 +187,8 @@ class AudioService : MediaBrowserServiceCompat() {
 
             override fun onPrepareFromUri(uri: Uri?, playWhenReady: Boolean, extras: Bundle?) {
 
-
                 val trackToPlay:Track?=extras?.getParcelable("track")
                 val addToPlayList= extras?.getBoolean("playlist")?:false
-
 
                 val dataSourceFactory =
                     DefaultDataSourceFactory(this@AudioService, "Media Player")
@@ -205,8 +230,6 @@ class AudioService : MediaBrowserServiceCompat() {
                 }
             }
 
-
-
             override fun onPrepare(playWhenReady: Boolean) {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }
@@ -222,7 +245,7 @@ class AudioService : MediaBrowserServiceCompat() {
     fun playAudio(track: Track)
     {
 
-       // currentTrack=track
+        // currentTrack=track
 
         val dataSourceFactory: DefaultDataSourceFactory = DefaultDataSourceFactory(this,"Media Player")
         val mediaSource: ExtractorMediaSource = ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(
@@ -284,8 +307,4 @@ class AudioService : MediaBrowserServiceCompat() {
         player=null
         super.onDestroy()
     }
-
-
-
-
 }
