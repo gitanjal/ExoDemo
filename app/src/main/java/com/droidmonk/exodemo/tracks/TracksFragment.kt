@@ -156,8 +156,8 @@ class TracksFragment : Fragment() {
 
     private fun getWebVideo():ArrayList<Track> {
 
-        var trackMP4=Track(1,"Simple MP4","Artist 1", resources.getString(R.string.media_url_mp4),null,null)
-        var trackDASH=Track(1,"Simple DASH","Artist 1", resources.getString(R.string.media_url_dash),"mpd",null)
+        var trackMP4=Track("1","Simple MP4","Artist 1", resources.getString(R.string.media_url_mp4),null,null)
+        var trackDASH=Track("2","Simple DASH","Artist 1", resources.getString(R.string.media_url_dash),"mpd",null)
 
         return arrayListOf(trackMP4,trackDASH)
     }
