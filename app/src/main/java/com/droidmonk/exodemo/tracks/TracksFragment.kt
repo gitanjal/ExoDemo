@@ -130,18 +130,12 @@ class TracksFragment : Fragment() {
 
             override fun onClick(track: Track) {
 
-
-                val uri= Uri.parse(track.path)
-
                 if(isAudio(getMimeType(track.path)))
                 {
-
                     activity?.let {startActivity( AudioPlayerActivity.getCallingIntent(it,track))}
-
                 }
                 else
                 {
-
                     startActivity(Intent(activity, VideoPlayerActivity::class.java).putExtra("track",track))
                 }
             }
@@ -157,10 +151,8 @@ class TracksFragment : Fragment() {
                     TYPE_VIDEO_LOCAL->getLocalVideo()
                     TYPE_VIDEO_WEB->getWebVideo()
                     TYPE_AUDIO_WEB->getWebAudio()
-                    else->ArrayList<Track>()
+                    else->ArrayList()
                 }
-
-
 
     private fun getWebVideo():ArrayList<Track> {
 

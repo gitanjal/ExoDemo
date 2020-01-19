@@ -30,6 +30,7 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 
 
 class AudioService : MediaBrowserServiceCompat() {
@@ -175,22 +176,52 @@ class AudioService : MediaBrowserServiceCompat() {
 
             override fun onPrepareFromUri(uri: Uri?, playWhenReady: Boolean, extras: Bundle?) {
 
+
                 val trackToPlay:Track?=extras?.getParcelable("track")
-                if(trackToPlay!=null && !trackToPlay?.path.equals(currentTrack?.path)) {
-                    currentTrack = extras?.getParcelable("track")
-
-                    val dataSourceFactory: DefaultDataSourceFactory =
-                        DefaultDataSourceFactory(this@AudioService, "Media Player")
-                    val mediaSource: ProgressiveMediaSource =
-                        ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(
-                            uri
-                        )
+                val addToPlayList= extras?.getBoolean("playlist")?:false
 
 
-                    player?.prepare(mediaSource)
-                    player?.setPlayWhenReady(true)
+                val dataSourceFactory =
+                    DefaultDataSourceFactory(this@AudioService, "Media Player")
+
+                val mediaSource: ProgressiveMediaSource =
+                    ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(
+                        uri
+                    )
+
+                if(addToPlayList)
+                {
+                    trackToPlay?.let { playlist.add(it) }
+
+                    //add to playlist
+                    concatenatedSource.addMediaSource(mediaSource)
+
+                    //check if it has only one item
+                    if(concatenatedSource.size==1)
+                    {
+
+                        player?.prepare(concatenatedSource)
+                        player?.setPlayWhenReady(true)
+                    }
+                }
+                else {
+                    //clear our playlist
+                    playlist.clear()
+                    trackToPlay?.let { playlist.add(it) }
+
+                    //start playback immediately
+                    if (trackToPlay != null && !trackToPlay?.path.equals(currentTrack?.path)) {
+                        currentTrack = extras?.getParcelable("track")
+
+                        concatenatedSource = ConcatenatingMediaSource(mediaSource)
+
+                        player?.prepare(concatenatedSource)
+                        player?.setPlayWhenReady(true)
+                    }
                 }
             }
+
+
 
             override fun onPrepare(playWhenReady: Boolean) {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
