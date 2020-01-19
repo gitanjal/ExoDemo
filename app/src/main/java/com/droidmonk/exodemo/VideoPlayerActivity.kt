@@ -121,7 +121,6 @@ class VideoPlayerActivity : AppCompatActivity() {
             else ->
                 throw IllegalStateException("Unsupported type: $type")
         }
-       // return ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
     }
 
 

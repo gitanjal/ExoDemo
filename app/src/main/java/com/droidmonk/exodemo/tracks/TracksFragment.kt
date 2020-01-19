@@ -155,11 +155,8 @@ class TracksFragment : Fragment() {
                         jsonObject.put("title",track.trackTitle)
                         jsonObject.put("extension",track.extension)
 
-                        var str=jsonObject.toString();
-
                         val downloadRequest=helper?.getDownloadRequest(Util.getUtf8Bytes(jsonObject.toString()))
                         DownloadService.sendAddDownload(activity,MediaDownloadService::class.java,downloadRequest,true)
-
 
                     }
 
@@ -167,7 +164,6 @@ class TracksFragment : Fragment() {
                         e?.printStackTrace()
                     }
                 });
-
 
                 /*var downloadRequest= DownloadRequest(
                     track.path,
@@ -177,7 +173,6 @@ class TracksFragment : Fragment() {
                     *//* customCacheKey= *//* null,
                     Util.getUtf8Bytes(track.trackTitle));
 */
-
             }
 
             override fun onClick(track: Track) {
