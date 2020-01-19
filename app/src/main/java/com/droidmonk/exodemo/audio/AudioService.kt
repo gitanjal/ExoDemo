@@ -47,9 +47,9 @@ class AudioService : MediaBrowserServiceCompat() {
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
 
-    private lateinit var stateBuilder: PlaybackStateCompat.Builder
 
     private var currentTrack:Track? = null
+    private val playlist= ArrayList<Track>()
 
     override fun onCreate() {
         super.onCreate()
@@ -105,24 +105,8 @@ class AudioService : MediaBrowserServiceCompat() {
 
         playerNotificationManager?.setPlayer(player)
 
-        mediaSession = MediaSessionCompat(baseContext, LOG_TAG)/*.apply {
+        mediaSession = MediaSessionCompat(baseContext, LOG_TAG)
 
-            // Enable callbacks from MediaButtons and TransportControls
-     *//*       setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-
-            )
-
-            // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
-            stateBuilder = PlaybackStateCompat.Builder()
-                .setActions(PlaybackStateCompat.ACTION_PLAY
-                        or PlaybackStateCompat.ACTION_PLAY_PAUSE
-                )
-            setPlaybackState(stateBuilder.build())*//*
-
-            // Set the session's token so that client activities can communicate with it.
-            setSessionToken(sessionToken)
-        }
-*/
         sessionToken=mediaSession.sessionToken
 
         playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
