@@ -160,13 +160,12 @@ class TracksFragment : Fragment() {
                         val downloadRequest=helper?.getDownloadRequest(Util.getUtf8Bytes(jsonObject.toString()))
                         DownloadService.sendAddDownload(activity,MediaDownloadService::class.java,downloadRequest,true)
 
-
                     }
 
                     override fun onPrepareError(helper: DownloadHelper?, e: IOException?) {
                         e?.printStackTrace()
                     }
-                });
+                })
 
 
                 /*var downloadRequest= DownloadRequest(
