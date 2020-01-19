@@ -65,8 +65,6 @@ class TracksFragment : Fragment() {
 
 
     var trackType:Int=TYPE_AUDIO_LOCAL   //default
-    private lateinit var mService: AudioService
-    private var mBound: Boolean = false
 
     private lateinit var mMediaBrowserCompat: MediaBrowserCompat
     private lateinit var mediaController: MediaControllerCompat
@@ -85,15 +83,9 @@ class TracksFragment : Fragment() {
 
                 MediaControllerCompat.setMediaController(activity!!, mediaController)
 
-//                buildTransportControls()
-
             } catch (e: RemoteException) {
                 Log.d("tag","Remote exception")
             }
-        }
-
-        override fun onConnectionFailed() {
-            super.onConnectionFailed()
         }
     }
 
