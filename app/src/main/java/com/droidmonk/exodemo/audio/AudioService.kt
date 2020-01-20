@@ -43,8 +43,6 @@ class AudioService : MediaBrowserServiceCompat() {
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
 
-    private lateinit var stateBuilder: PlaybackStateCompat.Builder
-
     private var currentTrack:Track? = null
     private val playlist= ArrayList<Track>()
 
@@ -110,24 +108,8 @@ class AudioService : MediaBrowserServiceCompat() {
 
         playerNotificationManager?.setPlayer(player)
 
-        mediaSession = MediaSessionCompat(baseContext, LOG_TAG)/*.apply {
+        mediaSession = MediaSessionCompat(baseContext, LOG_TAG)
 
-            // Enable callbacks from MediaButtons and TransportControls
-     *//*       setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-
-            )
-
-            // SetD an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
-            stateBuilder = PlaybackStateCompat.Builder()
-                .setActions(PlaybackStateCompat.ACTION_PLAY
-                        or PlaybackStateCompat.ACTION_PLAY_PAUSE
-                )
-            setPlaybackState(stateBuilder.build())*//*
-
-            // Set the session's token so that client activities can communicate with it.
-            setSessionToken(sessionToken)
-        }
-*/
         sessionToken=mediaSession.sessionToken
 
         playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
@@ -152,7 +134,6 @@ class AudioService : MediaBrowserServiceCompat() {
                 playWhenReady: Boolean,
                 extras: Bundle?
             ) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }
 
             override fun onCommand(
@@ -176,16 +157,14 @@ class AudioService : MediaBrowserServiceCompat() {
                 playWhenReady: Boolean,
                 extras: Bundle?
             ) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }
 
             override fun onPrepareFromUri(uri: Uri?, playWhenReady: Boolean, extras: Bundle?) {
 
-                val trackToPlay:Track?=extras?.getParcelable("track")
                 val addToPlayList= extras?.getBoolean("playlist")?:false
+                val trackToPlay:Track?=extras?.getParcelable("track")
 
-                val dataSourceFactory =
-                    DefaultDataSourceFactory(this@AudioService, "Media Player")
+                val dataSourceFactory =DefaultDataSourceFactory(this@AudioService, "Media Player")
 
                 val mediaSource: ProgressiveMediaSource =
                     ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(
@@ -195,14 +174,11 @@ class AudioService : MediaBrowserServiceCompat() {
                 if(addToPlayList)
                 {
                     trackToPlay?.let { playlist.add(it) }
-
-                    //add to playlist
                     concatenatedSource.addMediaSource(mediaSource)
 
                     //check if it has only one item
                     if(concatenatedSource.size==1)
                     {
-
                         player?.prepare(concatenatedSource)
                         player?.setPlayWhenReady(true)
                     }
@@ -213,8 +189,7 @@ class AudioService : MediaBrowserServiceCompat() {
                     trackToPlay?.let { playlist.add(it) }
 
                     //start playback immediately
-                    if (trackToPlay != null && !trackToPlay?.path.equals(currentTrack?.path)) {
-                        currentTrack = extras?.getParcelable("track")
+                    if (trackToPlay != null) {
 
                         concatenatedSource = ConcatenatingMediaSource(mediaSource)
 

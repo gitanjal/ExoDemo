@@ -3,17 +3,13 @@ package com.droidmonk.exodemo.tracks
 
 import android.Manifest
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
-import android.content.Intent.getIntent
-import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
-import android.os.IBinder
 import android.os.RemoteException
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -33,11 +29,7 @@ import com.droidmonk.exodemo.VideoPlayerActivity
 import com.droidmonk.exodemo.audio.AudioPlayerActivity
 import com.droidmonk.exodemo.audio.AudioService
 import com.google.android.exoplayer2.util.MimeTypes.isAudio
-import com.google.android.exoplayer2.util.Util
-import kotlinx.android.synthetic.main.activity_audio_player.*
 import kotlinx.android.synthetic.main.fragment_tracks.*
-import java.io.File
-import java.util.*
 
 
 /**
@@ -52,7 +44,6 @@ class TracksFragment : Fragment() {
         val TYPE_AUDIO_WEB=4
 
         val KEY_TYPE="key"
-
 
         @JvmStatic
         fun newInstance(type:Int) =
@@ -87,12 +78,26 @@ class TracksFragment : Fragment() {
                 Log.d("tag","Remote exception")
             }
         }
+
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         trackType= arguments?.getInt(KEY_TYPE)?: TYPE_AUDIO_LOCAL
+
+        mMediaBrowserCompat = MediaBrowserCompat(
+            activity, ComponentName(activity, AudioService::class.java),
+            mediaBrowserConnectionCallback, activity?.intent?.extras
+        )
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        mMediaBrowserCompat.connect()
 
     }
 
@@ -109,14 +114,6 @@ class TracksFragment : Fragment() {
 
         checkPermission()
 
-        mMediaBrowserCompat = MediaBrowserCompat(
-            activity, ComponentName(activity, AudioService::class.java),
-            mediaBrowserConnectionCallback, activity?.intent?.extras
-        )
-
-        mMediaBrowserCompat.connect()
-
-
     }
 
     private fun setUpTrackList() {
@@ -124,9 +121,11 @@ class TracksFragment : Fragment() {
         var adapter=TracksAdapter(getTrackList())
         adapter.setOnClickListener(object : TracksAdapter.OnClickListener{
             override fun onClickAddToPlaylist(track: Track) {
-
-                mediaController.transportControls.playFromUri(Uri.parse(track.path),Bundle().apply { putBoolean("playlist",true) })
-               }
+                mediaController.transportControls.playFromUri(Uri.parse(track.path),Bundle().apply {
+                    putParcelable("track", track)
+                    putBoolean("playlist",true)
+                })
+            }
 
             override fun onClick(track: Track) {
 
@@ -145,29 +144,72 @@ class TracksFragment : Fragment() {
     }
 
     private fun getTrackList(): ArrayList<Track>
-                = when(trackType)
-                {
-                    TYPE_AUDIO_LOCAL->getLocalAudio()
-                    TYPE_VIDEO_LOCAL->getLocalVideo()
-                    TYPE_VIDEO_WEB->getWebVideo()
-                    TYPE_AUDIO_WEB->getWebAudio()
-                    else->ArrayList()
-                }
+            = when(trackType)
+    {
+        TYPE_AUDIO_LOCAL->getLocalAudio()
+        TYPE_VIDEO_LOCAL->getLocalVideo()
+        TYPE_VIDEO_WEB->getWebVideo()
+        TYPE_AUDIO_WEB->getWebAudio()
+        else->ArrayList<Track>()
+    }
+
 
     private fun getWebVideo():ArrayList<Track> {
 
-        var trackMP4=Track("1","Simple MP4","Artist 1", resources.getString(R.string.media_url_mp4),null,null)
-        var trackDASH=Track("2","Simple DASH","Artist 1", resources.getString(R.string.media_url_dash),"mpd",null)
+        var trackMP4=Track(
+            "Simple MP4",
+            "Artist 1",
+            resources.getString(R.string.media_url_mp4),
+            null,
+            null,
+            null
+        )
+        var trackDASH=Track(
+            "Simple DASH",
+            "Artist 1",
+            resources.getString(R.string.media_url_dash),
+            "mpd",
+            null,
+            null
+        )
 
         return arrayListOf(trackMP4,trackDASH)
     }
 
     private fun getWebAudio():ArrayList<Track> {
 
-        var trackMP4=Track(1,"Guitar solo","Unknown Artist", resources.getString(R.string.media_url_mp4),null,null)
-        var trackDASH=Track(1,"Guitar fingerstyle","Unknown Artist", resources.getString(R.string.media_url_dash),null,null)
-        var trackMP41=Track(1,"C progression","Unknown Artist", resources.getString(R.string.media_url_mp4),null,null)
-        var trackDASH2=Track(1,"Do re mi","Unknown Artist", resources.getString(R.string.media_url_dash),null,null)
+        var trackMP4=Track(
+            "Guitar solo",
+            "Unknown Artist",
+            "https://storage.googleapis.com/automotive-media/Jazz_In_Paris.mp3",
+            null,
+            null,
+            null
+        )
+        var trackDASH=Track(
+            "Guitar fingerstyle",
+            "Unknown Artist",
+            "https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
+            null,
+            null,
+            null
+        )
+        var trackMP41=Track(
+            "C progression",
+            "Unknown Artist",
+            resources.getString(R.string.media_url_mp4),
+            null,
+            null,
+            null
+        )
+        var trackDASH2=Track(
+            "Do re mi",
+            "Unknown Artist",
+            resources.getString(R.string.media_url_dash),
+            null,
+            null,
+            null
+        )
 
         return arrayListOf(trackMP4,trackDASH,trackMP41,trackDASH2)
     }
@@ -195,7 +237,7 @@ class TracksFragment : Fragment() {
                 val thisTitle = videoCursor.getString(titleColumn)
                 val thisArtist = videoCursor.getString(artistColumn)
                 val thisPath = videoCursor.getString(dataColumn)
-                trackList.add(Track(thisId, thisTitle, thisArtist, thisPath, null, null))
+                trackList.add(Track( thisTitle, thisArtist, thisPath, null, null,null))
             } while (videoCursor.moveToNext())
         }
 
@@ -234,7 +276,7 @@ class TracksFragment : Fragment() {
                     val albumArt:ByteArray=mediaDataRetriever.embeddedPicture
                     songImage = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size);
                 }
-                trackList.add(Track(thisId, thisTitle, thisArtist,thisPath,null,null))
+                trackList.add(Track( thisTitle, thisArtist, thisPath, null, songImage,Uri.parse(thisPath)))
             } while (musicCursor.moveToNext())
         }
 
@@ -306,10 +348,10 @@ class TracksFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
 
-      /*  if(mBound) {
-            activity?.unbindService(connection)
-            mBound = false
-        }*/
+        /*  if(mBound) {
+              activity?.unbindService(connection)
+              mBound = false
+          }*/
     }
 
 /*
