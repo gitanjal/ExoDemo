@@ -18,7 +18,7 @@ class MediaDownloadService() : DownloadService(FOREGROUND_NOTIFICATION_ID,
     companion object {
         private const val CHANNEL_ID = "download_channel"
         private const val JOB_ID = 1
-        private const val FOREGROUND_NOTIFICATION_ID = 1
+        private const val FOREGROUND_NOTIFICATION_ID = 2
         private var nextNotificationId =
             FOREGROUND_NOTIFICATION_ID + 1
     }
