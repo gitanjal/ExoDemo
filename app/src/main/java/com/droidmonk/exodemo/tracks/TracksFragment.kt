@@ -33,17 +33,14 @@ import com.google.android.exoplayer2.DefaultRenderersFactory
 import com.google.android.exoplayer2.RenderersFactory
 import com.google.android.exoplayer2.offline.DownloadCursor
 import com.google.android.exoplayer2.offline.DownloadHelper
-import com.google.android.exoplayer2.offline.DownloadRequest
 import com.google.android.exoplayer2.offline.DownloadService
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.MimeTypes.isAudio
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.fragment_tracks.*
 import org.json.JSONObject
 import java.io.IOException
-import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -155,8 +152,6 @@ class TracksFragment : Fragment() {
                         jsonObject.put("title",track.trackTitle)
                         jsonObject.put("extension",track.extension)
 
-                        var str=jsonObject.toString();
-
                         val downloadRequest=helper?.getDownloadRequest(Util.getUtf8Bytes(jsonObject.toString()))
                         DownloadService.sendAddDownload(activity,MediaDownloadService::class.java,downloadRequest,true)
 
@@ -202,26 +197,30 @@ class TracksFragment : Fragment() {
                     TYPE_VIDEO_LOCAL->getLocalVideo()
                     TYPE_VIDEO_WEB->getWebVideo()
                     TYPE_AUDIO_WEB->getWebAudio()
-                    TYPE_DOWNLOADS->getDownloads()
+                    TYPE_DOWNLOADS->getDownloadedItems()
                     else->ArrayList<Track>()
                 }
 
-    private fun getDownloads(): ArrayList<Track> {
+    private fun getDownloadedItems(): ArrayList<Track> {
 
         val downloadedTracks= ArrayList<Track>()
-
         val downloadCursor:DownloadCursor=(activity?.application as App).appContainer.downloadManager.downloadIndex.getDownloads()
         if (downloadCursor.moveToFirst()) {
-
             do{
             val jsonString = Util.fromUtf8Bytes(downloadCursor.download.request.data)
             val jsonObject=JSONObject(jsonString)
             val uri=downloadCursor.download.request.uri
 
-            downloadedTracks.add(Track(jsonObject.getString("title"),null,uri.toString(),jsonObject.getString("extension"),null,null))
-
+            downloadedTracks.add(
+                Track(
+                    jsonObject.getString("title"),
+                    null,
+                    uri.toString(),
+                    jsonObject.getString("extension"),
+                    null,
+                    null)
+                )
             }while (downloadCursor.moveToNext())
-            Log.d("TracksFragment","Hello world")
         }
         return downloadedTracks
     }

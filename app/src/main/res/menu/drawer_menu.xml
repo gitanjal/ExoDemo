@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="Local Audio"
+    <item android:title="@string/local_audio"
         android:id="@+id/menu_local_audio"/>
 
-    <item android:title="Local Video"
+    <item android:title="@string/local_video"
         android:id="@+id/menu_local_video"/>
 
-    <item android:title="Web Video"
+    <item android:title="@string/web_video"
         android:id="@+id/menu_web_video"/>
 
-    <item android:title="Web Audio"
+    <item android:title="@string/web_audio"
         android:id="@+id/menu_web_audio"/>
 
-    <item android:title="Downloads"
+    <item android:title="@string/downloads"
         android:id="@+id/menu_download"/>
 </menu>
