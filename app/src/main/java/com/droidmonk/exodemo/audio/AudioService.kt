@@ -190,7 +190,6 @@ class AudioService : MediaBrowserServiceCompat() {
                 val trackToPlay:Track?=extras?.getParcelable("track")
                 val addToPlayList= extras?.getBoolean("playlist")?:false
 
-
                 val dataSourceFactory =
                     DefaultDataSourceFactory(this@AudioService, "Media Player")
 
@@ -198,9 +197,7 @@ class AudioService : MediaBrowserServiceCompat() {
                     (application as App).appContainer.downloadCache, dataSourceFactory);
 
                 val mediaSource: ProgressiveMediaSource =
-                    ProgressiveMediaSource.Factory(cachedDataSourceFactory).createMediaSource(
-                        uri
-                    )
+                    ProgressiveMediaSource.Factory(cachedDataSourceFactory).createMediaSource(uri)
 
                 if(addToPlayList)
                 {
@@ -212,7 +209,6 @@ class AudioService : MediaBrowserServiceCompat() {
                     //check if it has only one item
                     if(concatenatedSource.size==1)
                     {
-
                         player?.prepare(concatenatedSource)
                         player?.setPlayWhenReady(true)
                     }

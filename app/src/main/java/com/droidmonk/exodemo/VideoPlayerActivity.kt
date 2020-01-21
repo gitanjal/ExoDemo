@@ -45,7 +45,6 @@ class VideoPlayerActivity : AppCompatActivity() {
         player_view.player = player
         adsLoader?.setPlayer(player)
 
-
         val dataSourceFactory = DefaultDataSourceFactory(
             this,
             "ExoDemo"
@@ -55,13 +54,10 @@ class VideoPlayerActivity : AppCompatActivity() {
 
         val adsMediaSource = AdsMediaSource(mediaSource, dataSourceFactory, adsLoader, player_view)
 
-
         player?.prepare(adsMediaSource)
         player?.setPlayWhenReady(true)
 
-
         btn_speed.setOnClickListener {
-            //  Toast.makeText(it.context,"Click speed controll",Toast.LENGTH_LONG).show()
 
             val popup = PopupMenu(this, it)
             val inflater: MenuInflater = popup.menuInflater
@@ -116,7 +112,6 @@ class VideoPlayerActivity : AppCompatActivity() {
             else ->
                 throw IllegalStateException("Unsupported type: $type")
         }
-       // return ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
     }
 
 
