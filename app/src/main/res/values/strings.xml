@@ -13,6 +13,8 @@
     <string name="drawer_close">close drawer</string>
 
     <string name="download_service_notification_channel">ExoDemo download</string>
+    <string name="download_service_notification_channel_description">Notification for displaying download progress</string>
+
     <string name="local_audio">Local Audio</string>
     <string name="local_video">Local Video</string>
     <string name="web_video">Web Video</string>
