@@ -13,5 +13,6 @@
     <string name="drawer_close">close drawer</string>
 
     <string name="download_service_notification_channel">ExoDemo download</string>
+    <string name="download_service_notification_channel_description">Notification for displaying download progress</string>
 
 </resources>
