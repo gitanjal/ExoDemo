@@ -33,17 +33,14 @@ import com.google.android.exoplayer2.DefaultRenderersFactory
 import com.google.android.exoplayer2.RenderersFactory
 import com.google.android.exoplayer2.offline.DownloadCursor
 import com.google.android.exoplayer2.offline.DownloadHelper
-import com.google.android.exoplayer2.offline.DownloadRequest
 import com.google.android.exoplayer2.offline.DownloadService
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.MimeTypes.isAudio
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.fragment_tracks.*
 import org.json.JSONObject
 import java.io.IOException
-import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -198,11 +195,11 @@ class TracksFragment : Fragment() {
                     TYPE_VIDEO_LOCAL->getLocalVideo()
                     TYPE_VIDEO_WEB->getWebVideo()
                     TYPE_AUDIO_WEB->getWebAudio()
-                    TYPE_DOWNLOADS->getDownloads()
+                    TYPE_DOWNLOADS->getDownloadedItems()
                     else->ArrayList<Track>()
                 }
 
-    private fun getDownloads(): ArrayList<Track> {
+    private fun getDownloadedItems(): ArrayList<Track> {
 
         val downloadedTracks= ArrayList<Track>()
 
