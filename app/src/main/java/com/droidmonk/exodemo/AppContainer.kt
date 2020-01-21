@@ -1,6 +1,5 @@
 package com.droidmonk.exodemo
 
-import android.app.Application
 import android.content.Context
 import com.google.android.exoplayer2.database.DatabaseProvider
 import com.google.android.exoplayer2.database.ExoDatabaseProvider
