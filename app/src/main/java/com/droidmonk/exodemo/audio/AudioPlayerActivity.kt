@@ -113,10 +113,10 @@ class AudioPlayerActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        super.onStop()
 
         mediaController.unregisterCallback(mediaControllerCallback)
         mMediaBrowserCompat.disconnect()
+        super.onStop()
     }
 
 
