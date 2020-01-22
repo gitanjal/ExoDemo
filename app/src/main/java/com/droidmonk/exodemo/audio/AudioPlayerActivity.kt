@@ -65,7 +65,7 @@ class AudioPlayerActivity : AppCompatActivity() {
                 // Register a Callback to stay in sync
                 mediaController.registerCallback(mediaControllerCallback)
 
-                initialiseUIStates(mediaController.metadata,mediaController.playbackState)
+                initialiseUIStates(mediaController.metadata, mediaController.playbackState)
 
                 buildTransportControls()
 
@@ -119,7 +119,85 @@ class AudioPlayerActivity : AppCompatActivity() {
         mMediaBrowserCompat.disconnect()
     }
 
+    fun buildTransportControls() {
 
+        if (currentTrack != null)
+            mediaController.transportControls.playFromUri(
+                Uri.parse(currentTrack?.path),
+                Bundle().apply { putParcelable("track", currentTrack) })
+
+        btn_play_pause.apply {
+            setOnClickListener {
+                // Since this is a play/pause button, you'll need to test the current state
+                // and choose the action accordingly
+
+                val pbState = mediaController.playbackState.state
+                if (pbState == PlaybackStateCompat.STATE_PLAYING) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        btn_play_pause.background = resources.getDrawable(R.drawable.ic_play, theme)
+                    } else {
+                        btn_play_pause.background = resources.getDrawable(R.drawable.ic_play)
+                    }
+                    mediaController.transportControls.pause()
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        btn_play_pause.background =
+                            resources.getDrawable(R.drawable.ic_pause, theme)
+                    } else {
+                        btn_play_pause.background = resources.getDrawable(R.drawable.ic_pause)
+                    }
+                    mediaController.transportControls.play()
+                }
+            }
+        }
+
+        btn_repeat.setOnClickListener {
+            if (mediaController.repeatMode.equals(PlaybackStateCompat.REPEAT_MODE_NONE)) {
+                mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat_on, theme)
+                } else {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat_on)
+                }
+            } else {
+                mediaController.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_NONE)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat, theme)
+                } else {
+                    btn_repeat.background = resources.getDrawable(R.drawable.ic_repeat)
+                }
+            }
+        }
+
+        btn_next.setOnClickListener {
+            mediaController.transportControls.skipToNext()
+        }
+
+        btn_prev.setOnClickListener {
+            mediaController.transportControls.skipToPrevious()
+        }
+
+        btn_shuffle.setOnClickListener {
+            if (mediaController.shuffleMode.equals(PlaybackStateCompat.SHUFFLE_MODE_ALL)) {
+                mediaController.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    btn_shuffle.background = resources.getDrawable(R.drawable.ic_shuffle, theme)
+                } else {
+                    btn_shuffle.background = resources.getDrawable(R.drawable.ic_shuffle)
+                }
+            } else {
+                mediaController.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    btn_shuffle.background = resources.getDrawable(R.drawable.ic_shuffle_on, theme)
+                } else {
+                    btn_shuffle.background = resources.getDrawable(R.drawable.ic_shuffle_on)
+                }
+            }
+        }
+    }
+
+
+/*
     fun buildTransportControls() {
 
         if (currentTrack != null)
@@ -157,6 +235,7 @@ class AudioPlayerActivity : AppCompatActivity() {
         }
 
     }
+*/
 
     private var mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
