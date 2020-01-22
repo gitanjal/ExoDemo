@@ -3,6 +3,7 @@ package com.droidmonk.exodemo
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuInflater
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -19,6 +20,7 @@ import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.source.dash.DashMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.activity_video_player.*
 import kotlinx.android.synthetic.main.exo_playback_control_view.*
@@ -102,13 +104,16 @@ class VideoPlayerActivity : AppCompatActivity() {
         dataSourceFactory: DefaultDataSourceFactory
     ): MediaSource {
         val uri:Uri=Uri.parse(trackToPlay.path)
+        val extension = MimeTypeMap.getFileExtensionFromUrl(trackToPlay.path)
         val type=Util.inferContentType(uri,trackToPlay.extension)
+        val cachedDataSourceFactory: CacheDataSourceFactory = CacheDataSourceFactory(
+            (application as App).appContainer.downloadCache, dataSourceFactory);
         when(type)
         {
             C.TYPE_DASH
-                -> return DashMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
+            -> return DashMediaSource.Factory(cachedDataSourceFactory).createMediaSource(uri)
             C.TYPE_OTHER
-                -> return ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
+            -> return ProgressiveMediaSource.Factory(cachedDataSourceFactory).createMediaSource(uri)
             else ->
                 throw IllegalStateException("Unsupported type: $type")
         }

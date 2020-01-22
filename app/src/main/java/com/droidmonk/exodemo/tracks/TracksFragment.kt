@@ -37,6 +37,7 @@ import com.google.android.exoplayer2.util.MimeTypes.isAudio
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.fragment_tracks.*
 import kotlinx.android.synthetic.main.item_track.*
+import java.net.URLEncoder
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -385,7 +386,7 @@ class TracksFragment : Fragment() {
 
     fun getMimeType(url: String): String? {
         var type: String? = null
-        val extension = MimeTypeMap.getFileExtensionFromUrl(url)
+        val extension = MimeTypeMap.getFileExtensionFromUrl(URLEncoder.encode(url,"utf-8"))
         if (extension != null) {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
         }
