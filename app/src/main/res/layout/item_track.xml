@@ -14,7 +14,7 @@
 
     <TextView
         android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/more"
+        android:layout_toLeftOf="@id/playlist"
         android:layout_toRightOf="@id/img_album"
         android:layout_marginLeft="10dp"
         android:id="@+id/track_title"
@@ -23,7 +23,7 @@
         android:textStyle="bold" />
     <ImageButton
         android:layout_centerVertical="true"
-        android:id="@+id/more"
+        android:id="@+id/playlist"
         android:src="@drawable/ic_add_black_24dp"
         android:layout_alignParentRight="true"
         android:layout_width="50dp"
@@ -33,7 +33,7 @@
         android:layout_centerVertical="true"
         android:id="@+id/download"
         android:src="@drawable/ic_file_download_black_24dp"
-        android:layout_toLeftOf="@id/more"
+        android:layout_toLeftOf="@id/playlist"
         android:layout_width="50dp"
         android:layout_height="50dp"/>
 </RelativeLayout>

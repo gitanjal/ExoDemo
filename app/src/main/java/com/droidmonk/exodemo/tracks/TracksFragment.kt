@@ -118,7 +118,7 @@ class TracksFragment : Fragment() {
 
     private fun setUpTrackList() {
 
-        var adapter=TracksAdapter(getTrackList())
+        val adapter=TracksAdapter(getTrackList())
         adapter.setOnClickListener(object : TracksAdapter.OnClickListener{
             override fun onClickAddToPlaylist(track: Track) {
                 mediaController.transportControls.playFromUri(Uri.parse(track.path),Bundle().apply {
